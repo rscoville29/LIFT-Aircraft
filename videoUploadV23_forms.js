@@ -31,7 +31,7 @@ function submitForm(event) {
                     console.log("Member Id:", memberId);
 
                     // Save video details with existing member reference
-                    return wixData.insert('FlightVideos', {
+                    return wixData.insert('FlightVideosFromForms', {
                         firstName,
                         lastName,
                         email,
@@ -39,7 +39,7 @@ function submitForm(event) {
                         url:fullUrl
                     });
                 } else {
-                    return wixData.insert('FlightVideos', {
+                    return wixData.insert('FlightVideosFromForms', {
                         firstName,
                         lastName,
                         email,
