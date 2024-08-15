@@ -16,7 +16,7 @@ function submitForm(event) {
         console.log('url');
         const email = event.email_003c;
         const firstName = event.first_name4feb;
-        const lastName = event.last_name04e2
+        const lastName = event.last_name04e2;
         const location = event.location;
 
         // Query to find existing member by email
@@ -32,18 +32,18 @@ function submitForm(event) {
 
                     // Save video details with existing member reference
                     return wixData.insert('FlightVideosFromForms', {
-                        firstName,
-                        lastName,
-                        email,
-                        location,
+                        firstName:firstName,
+                        lastName:lastName,
+                        email:email,
+                        location:location,
                         url:fullUrl
                     });
                 } else {
                     return wixData.insert('FlightVideosFromForms', {
-                        firstName,
-                        lastName,
-                        email,
-                        location,
+                        firstName:firstName,
+                        lastName:lastName,
+                        email:email,
+                        location:location,
                         url:fullUrl
                     });
                 }
