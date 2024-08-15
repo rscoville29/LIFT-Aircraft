@@ -15,8 +15,8 @@ function submitForm(event) {
         const fullUrl = "https://video.wixstatic.com/video" + url;
         console.log('url');
         const email = event.email_003c;
-        const firstName = event.first_name4feb;
-        const lastName = event.last_name04e2;
+        const firstName = event.first_name_4feb;
+        const lastName = event.last_name_04e2;
         const location = event.location;
 
         // Query to find existing member by email
