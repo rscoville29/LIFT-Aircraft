@@ -36,6 +36,7 @@ $w.onReady(async function () {
     $w("#listRepeater").onItemReady(async ($item, itemData) => {
         $item("#button57").onClick(async (event) => {
             console.log("Button Clicked:", event);
+            let videoUrl = itemData.video;
             console.log("Raw URL:", videoUrl);
 
             if (videoUrl) {
@@ -43,7 +44,7 @@ $w.onReady(async function () {
                     let downloadUrl = await getDownloadUrl(videoUrl);
                     console.log("Download URL:", downloadUrl);
                     if (downloadUrl) {
-                        wixLocation.to(downloadUrl); 
+                        wixLocation.to(downloadUrl);
                     } else {
                         console.error("No download URL found for this item.");
                     }
