@@ -1,3 +1,5 @@
+//this code is currently unused.
+
 import wixData from 'wix-data';
 import wixWindow from 'wix-window';
 
@@ -66,16 +68,6 @@ function submitForm(event) {
 $w.onReady(function () {
 	const videoForm = $w('#371Ee199389C4A93849Ee35B8A15B7Ca1');
 	videoForm.onSubmit(submitForm);
-
-	// Write your Javascript code here using the Velo framework API
-
-	// Print hello world:
-	// console.log("Hello world!");
-
-	// Call functions on page elements, e.g.:
-	// $w("#button1").label = "Click me!";
-
-	// Click "Run", or Preview your site, to execute your code
 
 });
 
