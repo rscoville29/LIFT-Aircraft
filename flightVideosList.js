@@ -1,6 +1,8 @@
 import wixData from 'wix-data';
 import wixUsers from 'wix-users';
 import wixLocation from 'wix-location';
+import { getDownloadUrl } from 'backend/backend';
+
 
 async function getUserEmail(user) {
     let email = await user.getEmail();
@@ -16,7 +18,7 @@ $w.onReady(async function () {
         wixData.query("FlightVideos")
             .eq("pilotEmail", email)
             .find()
-            .then((results) => {
+            .then(async (results) => {
                 console.log("Query Results:", results.items);
                 if (results.items.length > 0) {
                     $w("#listRepeater").data = results.items;
@@ -31,14 +33,23 @@ $w.onReady(async function () {
         console.log("User not logged in");
     }
 
-    // Ensure the repeater and its items are properly loaded before setting up event handlers
-    $w("#listRepeater").onItemReady(($item, itemData) => {
-        $item("#button57").onClick((event) => {
+    $w("#listRepeater").onItemReady(async ($item, itemData) => {
+        $item("#button57").onClick(async (event) => {
             console.log("Button Clicked:", event);
-            let videoUrl = itemData.video; // Use the correct field name 'video'
-            console.log("URL:", videoUrl);
+            console.log("Raw URL:", videoUrl);
+
             if (videoUrl) {
-                wixLocation.to(videoUrl); // Navigates to the URL, which should trigger a download if properly configured
+                try {
+                    let downloadUrl = await getDownloadUrl(videoUrl);
+                    console.log("Download URL:", downloadUrl);
+                    if (downloadUrl) {
+                        wixLocation.to(downloadUrl); 
+                    } else {
+                        console.error("No download URL found for this item.");
+                    }
+                } catch (error) {
+                    console.error("Failed to retrieve download URL:", error);
+                }
             } else {
                 console.error("No video URL found for this item.");
             }
