@@ -177,7 +177,6 @@ export async function updateBookingInLiftOps(bookingId, checkin, firstNames, las
         },
         body: JSON.stringify(messageBody)
     };
-
     return wixFetch.fetch("https://liftaircraft.j.layershift.co.uk/dispatch/bookingupdate", fetchOptions)
         .then(httpResponse => { return httpResponse });
 

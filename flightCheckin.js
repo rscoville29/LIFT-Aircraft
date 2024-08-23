@@ -5,7 +5,7 @@ import { getBookings, getWaivers, getNotes, getBooking, getCompanion, saveCompan
 let booking = null;
 let contact = null;
 
-function addPilotsToVideoDataset(allPilots) {
+async function addPilotsToVideoDataset(allPilots) {
     const {emails, firstNames, lastNames} = allPilots;
     for(let i = 0; i < emails.length; i++){
         let pilot = {
@@ -13,7 +13,7 @@ function addPilotsToVideoDataset(allPilots) {
             firstName: firstNames[i],
             lastName: lastNames[i]
         }
-    wixData.insert("FlightVideos", pilot).then(info=>{console.log("Added Pilot Video:", info)})
+    await wixData.insert("FlightVideos", pilot).then(info=>{console.log("Added Pilot Video:", info)})
     .catch((err)=>{console.log(err)});
     }
     
@@ -318,7 +318,7 @@ export async function saveNowButton_click(event) {
         }
         //this function will loop through the arrays and create a video template to easily track who needs a video
         //and upload the video. When they log in later, the videos will automatically filter to their own video.
-        addPilotsToVideoDataset(pilots);
+        await addPilotsToVideoDataset(pilots);
 
     saveCompanion(booking._id, 0, notes, firstNames, lastNames, genders, emails, weights, waivers)
         .then(result => {
@@ -340,7 +340,7 @@ export async function saveNowButton_click(event) {
 	[Read more](https://www.wix.com/corvid/reference/$w.ClickableMixin.html#onClick)
 *	 @param {$w.MouseEvent} event
 */
-export function checkinButton_click(event) {
+export async function checkinButton_click(event) {
     let emails = [];
     let firstNames = [];
     let lastNames = [];
@@ -360,6 +360,16 @@ export function checkinButton_click(event) {
         }
     }
 
+        //adding the checked in pilots to flight videos for simple association and uploading
+        let pilots = {
+            emails,
+            firstNames,
+            lastNames
+        }
+        //this function will loop through the arrays and create a video template to easily track who needs a video
+        //and upload the video. When they log in later, the videos will automatically filter to their own video.
+        await addPilotsToVideoDataset(pilots);
+
     saveCompanion(booking._id, emails.length, notes, firstNames, lastNames, genders, emails, weights, waivers)
         .then(result => {
 
@@ -376,20 +386,27 @@ export function checkinButton_click(event) {
 
 }
 
-/**
-*	Adds an event handler that runs when an input element's value
- is changed.
-	[Read more](https://www.wix.com/corvid/reference/$w.ValueMixin.html#onChange)
-*	 @param {$w.Event} event
-*/
+//testing that the input for email is actually an email address
+function validateEmail(email) {
+    if(!email){
+        return false;
+    }else{
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailPattern.test(email);
+    }
+
+}
+
 export function validate(event) {
 
     let valid = true;
     for (let i = 1; i < 5; i++) {
+        let email = $w('#email' + i.toString()).value
+        let isEmailValid = validateEmail(email);
 
         if (!$w('#group' + i.toString()).hidden) {
 
-            if ($w('#email' + i.toString()).value != "" && !$w('#waiver' + i.toString()).checked) valid = false;
+            if (!isEmailValid || !$w('#waiver' + i.toString()).checked) valid = false;
         }
     }
     if (valid) $w('#checkinButton').show();
