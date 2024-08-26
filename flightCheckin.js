@@ -5,7 +5,7 @@ import { getBookings, getWaivers, getNotes, getBooking, getCompanion, saveCompan
 let booking = null;
 let contact = null;
 
-async function addPilotsToVideoDataset(allPilots) {
+export async function addPilotsToVideoDataset(allPilots) {
     const {emails, firstNames, lastNames} = allPilots;
     for(let i = 0; i < emails.length; i++){
         let pilot = {
@@ -209,7 +209,7 @@ export function dayTable_rowSelect(event) {
 
 }
 
-async function refreshBookingInputTable(book) {
+export async function refreshBookingInputTable(book) {
 
     let partySize = book.totalParticipants;
 
@@ -387,7 +387,7 @@ export async function checkinButton_click(event) {
 }
 
 //testing that the input for email is actually an email address
-function validateEmail(email) {
+export function validateEmail(email) {
     if(!email){
         return false;
     }else{
