@@ -1,6 +1,8 @@
 import wixMembers from 'wix-members';
 import wixData from 'wix-data';
 import { getBookings, getWaivers, getNotes, getBooking, getCompanion, saveCompanion, getContact, getContactByEmail, getSessionOfBooking } from "backend/backend.jsw"
+import { members } from "wix-members.v2";
+
 
 let booking = null;
 let contact = null;
