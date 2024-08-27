@@ -399,14 +399,16 @@ export function validateEmail(email) {
 
 export function validate(event) {
 
-    let valid = true;
+    let valid = false;
     for (let i = 1; i < 5; i++) {
         let email = $w('#email' + i.toString()).value
-        let isEmailValid = validateEmail(email);
+        //let isEmailValid = validateEmail(email);
 
         if (!$w('#group' + i.toString()).hidden) {
 
-            if (!isEmailValid || !$w('#waiver' + i.toString()).checked) valid = false;
+            if (email && $w('#waiver' + i.toString()).checked){
+            valid = true;
+            } 
         }
     }
     if (valid) $w('#checkinButton').show();
