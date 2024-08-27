@@ -4,6 +4,7 @@ import { getBookings, getWaivers, getNotes, getBooking, getCompanion, saveCompan
 
 let booking = null;
 let contact = null;
+let pilots = {};
 
 export async function addPilotsToVideoDataset(allPilots) {
     const {emails, firstNames, lastNames} = allPilots;
@@ -100,6 +101,84 @@ $w.onReady(function () {
     ];
 
     setCalendarToDate($w('#datePicker').value);
+    $w("#waiver1").onChange((event)=>{
+        let isChecked = $w("#waiver1").checked;
+        console.log("IS CHECKED?", isChecked);
+        if(isChecked){
+            pilots["pilot1"].waiver = true;
+        }else{
+            pilots["pilot1"].waiver = false;
+        }
+        console.log(pilots);
+        shouldShowCheckinButton();
+    });
+    $w("#waiver2").onChange((event)=>{
+         let isChecked = $w("#waiver2").checked;
+        console.log("IS CHECKED?", isChecked);
+        if(isChecked){
+            pilots["pilot2"].waiver = true;
+        }else{
+            pilots["pilot2"].waiver = false;
+        }
+        console.log(pilots);
+        shouldShowCheckinButton();
+    });
+    $w("#waiver3").onChange((event)=>{
+         let isChecked = $w("#waiver3").checked;
+        console.log("IS CHECKED?", isChecked);
+        if(isChecked){
+            pilots["pilot3"].waiver = true;
+        }else{
+            pilots["pilot3"].waiver = false;
+        }
+        console.log(pilots);
+        shouldShowCheckinButton();
+    });
+    $w("#waiver4").onChange((event)=>{
+         let isChecked = $w("#waiver4").checked;
+        console.log("IS CHECKED?", isChecked);
+        if(isChecked){
+            pilots["pilot4"].waiver = true;
+        }else{
+            pilots["pilot4"].waiver = false;
+        }
+        console.log(pilots);
+        shouldShowCheckinButton();
+    });
+
+    $w('#email2').onChange((event)=>{
+        let currentEmail = $w("#email2").value;
+        console.log("CURRENT EMAIL:", currentEmail);
+        if(validateEmail(currentEmail)){
+            pilots["pilot2"].email = true;
+        }else{
+            pilots["pilot2"].email = false;
+        }
+        console.log(pilots);
+        shouldShowCheckinButton();
+    });
+    $w('#email3').onChange((event)=>{
+         let currentEmail = $w("#email3").value;
+         console.log("CURRENT EMAIL:", currentEmail);
+        if(validateEmail(currentEmail)){
+            pilots["pilot3"].email = true;
+        }else{
+            pilots["pilot3"].email = false;
+        }
+        console.log(pilots);
+        shouldShowCheckinButton();
+    });
+    $w('#email4').onChange((event)=>{
+         let currentEmail = $w("#email4").value;
+         console.log("CURRENT EMAIL:", currentEmail);
+        if(validateEmail(currentEmail)){
+            pilots["pilot4"].email = true;
+        }else{
+            pilots["pilot4"].email = false;
+        }
+        console.log(pilots);
+        shouldShowCheckinButton();
+    });
 
 });
 
@@ -212,6 +291,10 @@ export function dayTable_rowSelect(event) {
 export async function refreshBookingInputTable(book) {
 
     let partySize = book.totalParticipants;
+    for(let i = 1; i <= partySize; i++){
+        pilots[`pilot${i}`] = {email: false, waiver: false}
+    }
+    console.log("PILOTS", pilots);
 
     $w('#group2').collapse();
     $w('#group3').collapse();
@@ -231,7 +314,6 @@ export async function refreshBookingInputTable(book) {
         $w('#waiver' + i.toString()).checked = false;
         $w('#email' + i.toString()).value = "";
         $w('#weight' + i.toString()).value = "";
-
         if (partySize > i - 1) {
             $w('#group' + i.toString()).expand();
             if (emails !== undefined && emails.length > i - 1) {
@@ -242,6 +324,7 @@ export async function refreshBookingInputTable(book) {
                     $w('#waiver' + i.toString()).checked = (waivers == undefined) ? false : waivers[i - 1];
                     $w('#email' + i.toString()).value = result.primaryInfo.email;
                     $w('#weight' + i.toString()).value = (result.info.extendedFields["custom.lastknownwt"] === undefined) ? "" : result.info.extendedFields["custom.lastknownwt"];
+                    
                 });
             }
         }
@@ -258,8 +341,9 @@ export async function refreshBookingInputTable(book) {
             $w('#email1').value = contact.primaryInfo.email;
             $w('#waiver1').checked = (waivers == undefined) ? false : waivers[0];
             $w('#weight1').value = (contact.info.extendedFields["custom.lastknownwt"] === undefined) ? "" : contact.info.extendedFields["custom.lastknownwt"];
+            pilots["pilot1"].email = true;
         });
-
+        console.log("PILOTS:", pilots)
 }
 
 export async function getCurrentMember(options) {
@@ -394,25 +478,26 @@ export function validateEmail(email) {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailPattern.test(email);
     }
-
 }
 
-export function validate(event) {
-
-    let valid = false;
-    for (let i = 1; i < 5; i++) {
-        let email = $w('#email' + i.toString()).value
-        //let isEmailValid = validateEmail(email);
-
-        if (!$w('#group' + i.toString()).hidden) {
-
-            if (email && $w('#waiver' + i.toString()).checked){
-            valid = true;
-            } 
+export function shouldShowCheckinButton(){
+ let allValid = true;
+for (let pilot in pilots) {
+        let pilotInfo = pilots[pilot];
+        for (let key in pilotInfo) {
+                if (!pilotInfo[key]) { 
+                    allValid = false;
+                    break; 
+                }     
         }
-    }
-    if (valid) $w('#checkinButton').show();
-    else $w('#checkinButton').hide();
-
+        if (!allValid) {
+            break; // Exit the outer loop early if a false value is found
+        }
 }
-
+console.log("ALL VALID?", allValid);
+if(allValid){
+    $w('#checkinButton').show();
+}else if(!allValid){
+    $w('#checkinButton').hide();
+}
+}
