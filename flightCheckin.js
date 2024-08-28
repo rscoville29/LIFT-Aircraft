@@ -9,13 +9,15 @@ import { members } from "wix-members.v2";
 let booking = null;
 let contact = null;
 let pilots = {};
+let location;
 
 export async function addPilotsToVideoDataset(pilots) {
     for (let pilot of Object.values(pilots)) {
         await wixData.insert("FlightVideos", {
             firstName: pilot.firstName,
             lastName: pilot.lastName,
-            pilotEmail: pilot.pilotEmail
+            pilotEmail: pilot.pilotEmail,
+            location
         }).then(info => {
             console.log("Added Pilot Video:", info);
         }).catch((err) => {
@@ -233,6 +235,30 @@ $w.onReady(function () {
             shouldShowCheckinButton();
     })
 
+    $w("#weight1").onChange((event)=>{
+        let currentWeight = $w('#weight1').value;
+        pilots["pilot1"].weight = currentWeight;
+        shouldShowCheckinButton();
+    });
+
+        $w("#weight2").onChange((event)=>{
+        let currentWeight = $w('#weight2').value;
+        pilots["pilot2"].weight = currentWeight;
+        shouldShowCheckinButton();
+    });
+
+        $w("#weight3").onChange((event)=>{
+        let currentWeight = $w('#weight3').value;
+        pilots["pilot3"].weight = currentWeight;
+        shouldShowCheckinButton();
+    });
+
+        $w("#weight4").onChange((event)=>{
+        let currentWeight = $w('#weight4').value;
+        pilots["pilot4"].weight = currentWeight;
+        shouldShowCheckinButton();
+    });
+
 
 });
 
@@ -336,6 +362,9 @@ export function dayTable_rowSelect(event) {
     getBooking(event.rowData.id)
         .then(result => {
             booking = result;
+            console.log("BOOKING:", booking)
+            location = booking.bookedEntity.location.businessLocation.name;
+            console.log("LOCATION:", location)
             refreshBookingInputTable(booking);
             $w('#bookingDataSection').expand();
         });
@@ -346,7 +375,7 @@ export async function refreshBookingInputTable(book) {
 
     let partySize = book.totalParticipants;
     for(let i = 1; i <= partySize; i++){
-        pilots[`pilot${i}`] = {firstName: null, lastName: null, pilotEmail: null, waiver: false}
+        pilots[`pilot${i}`] = {firstName: null, lastName: null, pilotEmail: null, waiver: false, weight: null}
     }
     console.log("PILOTS", pilots);
 
@@ -395,7 +424,7 @@ export async function refreshBookingInputTable(book) {
             $w('#email1').value = contact.primaryInfo.email;
             $w('#waiver1').checked = (waivers == undefined) ? false : waivers[0];
             $w('#weight1').value = (contact.info.extendedFields["custom.lastknownwt"] === undefined) ? "" : contact.info.extendedFields["custom.lastknownwt"];
-            pilots["pilot1"] = {firstName: contact.info.name.first, lastName: contact.info.name.last, pilotEmail: contact.primaryInfo.email, waiver: false};
+            pilots["pilot1"] = {firstName: contact.info.name.first, lastName: contact.info.name.last, pilotEmail: contact.primaryInfo.email, waiver: false, weight: contact.info.extendedFields["custom.lastknownwt"]};
         });
         console.log("PILOTS:", pilots)
 }
