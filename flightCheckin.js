@@ -2,7 +2,8 @@ import wixMembers from 'wix-members';
 import wixData from 'wix-data';
 import { getBookings, getWaivers, getNotes, getBooking, getCompanion, saveCompanion, 
 getContact, getContactByEmail, getSessionOfBooking,} from "backend/backend.jsw"
-import { myCreateMemberFunction} from "backend/webmethods.web"
+import { myCreateMemberFunction, myQueryMembersFunction} from "backend/webmethods.web"
+import { authentication } from "wix-members-frontend";
 
 
 
@@ -11,13 +12,54 @@ let contact = null;
 let pilots = {};
 let location;
 
-//currently hardcoded for testing
-const memberData = {
+export async function sendNewMemberEmail(newMember){
+    await authentication.sendSetPasswordEmail(newMember.loginEmail)
+             .then((status)=>{if(status){console.log("Email Sent!")}})
+             .catch((err)=>{console.log(err)});
+}
+
+
+export async function checkAndMakeMembers(pilots) {
+    try {
+        console.log("executing checkAndMakeMembers");
+        for (let pilot of Object.values(pilots)) {
+            //check to see if the pilot is a member first.
+            let options = {
+                search: {
+                    expression: pilot.pilotEmail
+                },
+                fields: ["loginEmail"]
+            }
+            let member = await myQueryMembersFunction(options);
+            if(member._items.length > 0){
+                console.log("IS member:", member)
+                pilot.id = member._items[0]._id;
+            }else{
+        let newMemberData = {
         member: {
-            loginEmail: "examplemember@example.com",
+            loginEmail: pilot.pilotEmail,
+            lastName: pilot.firstName,
+            firstName: pilot.lastName,
             privacyStatus: "PUBLIC"
         }
     };
+    console.log("Double Checking new member data:", newMemberData);
+    console.log("Is not member, making new member")
+         await myCreateMemberFunction(newMemberData).then((newMember)=>{
+             console.log("new Member Created:", newMember);
+             pilot.id = newMember._id;
+             sendNewMemberEmail(newMember);
+             })
+         .catch((err)=>{console.log(err)});
+            }
+        }
+        console.log("Pilots after loop:", pilots)
+        return;
+    } catch (error) {
+        console.error("Error in makeCheckinPilotsMembers:", error);
+        throw error;  // Re-throw the error to ensure it's properly logged and handled.
+    }
+}
 
 
 export async function addPilotsToVideoDataset(pilots) {
@@ -519,7 +561,7 @@ export async function saveNowButton_click(event) {
 */
 export async function checkinButton_click(event) {
     console.log("executing ONCLICK")
-    myCreateMemberFunction(memberData);
+    checkAndMakeMembers(pilots);
     //attempting to make a new member and returning early for testing purposes:
     //makeCheckinPilotsMembers(pilots);
     return;
@@ -560,7 +602,7 @@ export async function checkinButton_click(event) {
             $w('#outcomeSection').hide("fade",fadeOptions);
 
         });
-        await makeCheckinPilotsMembers(pilots);
+        await checkAndMakeMembers(pilots);
 
 }
 

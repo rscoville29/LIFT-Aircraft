@@ -46,33 +46,17 @@ export const myCreateMemberFunction = webMethod(
   },
 );
 
-export async function makeCheckinPilotsMembers(pilots) {
+export const myQueryMembersFunction = webMethod(
+  Permissions.Anyone,
+  async (options) => {
     try {
-        console.log("executing makeCheckinPilotsMembers");
-    const memberId = await elevate(() => members.createMember({}))();
-    console.log("New Member ID:", memberId);
-        // Hardcoding a pilot with some info just to get the functionality working
-        //let pilot = { firstName: "Pilot", lastName: "Testing", loginEmail: "pilot@email.com" };
+      const siteMembers = await members.queryMembers(options).find();
+      console.log("Retrieved members:", siteMembers);
 
-        // Use elevate to create the member with elevated permissions
-        //const result = await elevate(() => members.createMember(pilot))();
-        //console.log("Created Pilot:", result);
-
-        // Returning for now to test the hardcoded above
-        //return result;
-
-        // Assuming the rest of the code is for processing multiple pilots
-        return memberId;
-        for (let pilot of Object.values(pilots)) {
-            let pilotToMakeMember = {
-                firstName: pilot.firstName,
-                lastName: pilot.lastName,
-                loginEmail: pilot.email
-            };
-            await elevate(() => members.createMember(pilotToMakeMember))();
-        }
+      return siteMembers;
     } catch (error) {
-        console.error("Error in makeCheckinPilotsMembers:", error);
-        throw error;  // Re-throw the error to ensure it's properly logged and handled.
+      console.error(error);
+      // Handle the error
     }
-}
+  },
+);
