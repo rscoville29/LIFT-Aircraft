@@ -2,13 +2,14 @@ import wixMembers from 'wix-members';
 import wixData from 'wix-data';
 import { getBookings, getWaivers, getNotes, getBooking, getCompanion, saveCompanion, 
 getContact, getContactByEmail, getSessionOfBooking,} from "backend/backend.jsw"
-import { myCreateMemberFunction} from "backend/webmethods.web"
+import { myCreateMemberFunction, myQueryMembersFunction} from "backend/webmethods.web"
 
 
 
 let booking = null;
 let contact = null;
 let pilots = {};
+let pilotIds = [];
 let location;
 
 //currently hardcoded for testing
@@ -18,6 +19,32 @@ const memberData = {
             privacyStatus: "PUBLIC"
         }
     };
+
+
+export async function checkAndMakeMembers(pilots) {
+    try {
+        console.log("executing checkAndMakeMembers");
+        for (let pilot of Object.values(pilots)) {
+            //check to see if the pilot is a member first.
+            let options = {
+                search: {
+                    expression: pilot.pilotEmail
+                },
+                fields: ["loginEmail"]
+            }
+            let member = await myQueryMembersFunction(options);
+            if(member._items.length > 0){
+                console.log("IS member:", member)
+            }else{
+                console.log("Is not member:", member)
+            }
+        }
+        return;
+    } catch (error) {
+        console.error("Error in makeCheckinPilotsMembers:", error);
+        throw error;  // Re-throw the error to ensure it's properly logged and handled.
+    }
+}
 
 
 export async function addPilotsToVideoDataset(pilots) {
@@ -519,7 +546,7 @@ export async function saveNowButton_click(event) {
 */
 export async function checkinButton_click(event) {
     console.log("executing ONCLICK")
-    myCreateMemberFunction(memberData);
+    checkAndMakeMembers(pilots);
     //attempting to make a new member and returning early for testing purposes:
     //makeCheckinPilotsMembers(pilots);
     return;
@@ -560,7 +587,7 @@ export async function checkinButton_click(event) {
             $w('#outcomeSection').hide("fade",fadeOptions);
 
         });
-        await makeCheckinPilotsMembers(pilots);
+        await checkAndMakeMembers(pilots);
 
 }
 
