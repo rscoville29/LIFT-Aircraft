@@ -43,18 +43,6 @@ export async function checkAndMakeMembers(pilots) {
              pilot.id = newMember._id;
              })
          .catch((err)=>{console.log(err)});
-         /*
-        console.log("Getting New Member");
-        let newOptions = {
-                search: {
-                    expression: pilot.pilotEmail
-                },
-                fields: ["loginEmail"]
-            }
-            let newMember = await myQueryMembersFunction(newOptions);
-            console.log("New member created:", newMember );
-            pilot.id = newMember._items[0]._id;
-            */
             }
         }
         console.log("Pilots after loop:", pilots)
