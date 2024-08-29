@@ -3,6 +3,7 @@ import wixData from 'wix-data';
 import { getBookings, getWaivers, getNotes, getBooking, getCompanion, saveCompanion, 
 getContact, getContactByEmail, getSessionOfBooking,} from "backend/backend.jsw"
 import { myCreateMemberFunction, myQueryMembersFunction} from "backend/webmethods.web"
+import { authentication } from "wix-members-frontend";
 
 
 
@@ -10,6 +11,12 @@ let booking = null;
 let contact = null;
 let pilots = {};
 let location;
+
+export async function sendNewMemberEmail(newMember){
+    await authentication.sendSetPasswordEmail(newMember.loginEmail)
+             .then((status)=>{if(status){console.log("Email Sent!")}})
+             .catch((err)=>{console.log(err)});
+}
 
 
 export async function checkAndMakeMembers(pilots) {
@@ -41,6 +48,7 @@ export async function checkAndMakeMembers(pilots) {
          await myCreateMemberFunction(newMemberData).then((newMember)=>{
              console.log("new Member Created:", newMember);
              pilot.id = newMember._id;
+             sendNewMemberEmail(newMember);
              })
          .catch((err)=>{console.log(err)});
             }
