@@ -1,15 +1,24 @@
 import wixMembers from 'wix-members';
 import wixData from 'wix-data';
-import { getBookings, getWaivers, getNotes, getBooking, getCompanion, saveCompanion, getContact, getContactByEmail, getSessionOfBooking } from "backend/backend.jsw"
-import { members } from "wix-members.v2";
-//import { elevate } from "wix-auth";
+import { getBookings, getWaivers, getNotes, getBooking, getCompanion, saveCompanion, 
+getContact, getContactByEmail, getSessionOfBooking,} from "backend/backend.jsw"
+import { myCreateMemberFunction} from "backend/webmethods.web"
 
-//export const elevatedCreateUser = elevate(members.createMember);
+
 
 let booking = null;
 let contact = null;
 let pilots = {};
 let location;
+
+//currently hardcoded for testing
+const memberData = {
+        member: {
+            loginEmail: "examplemember@example.com",
+            privacyStatus: "PUBLIC"
+        }
+    };
+
 
 export async function addPilotsToVideoDataset(pilots) {
     for (let pilot of Object.values(pilots)) {
@@ -25,6 +34,7 @@ export async function addPilotsToVideoDataset(pilots) {
         });
     }
 }
+
 
 $w.onReady(function () {
 
@@ -508,6 +518,11 @@ export async function saveNowButton_click(event) {
 *	 @param {$w.MouseEvent} event
 */
 export async function checkinButton_click(event) {
+    console.log("executing ONCLICK")
+    myCreateMemberFunction(memberData);
+    //attempting to make a new member and returning early for testing purposes:
+    //makeCheckinPilotsMembers(pilots);
+    return;
     let emails = [];
     let firstNames = [];
     let lastNames = [];
@@ -545,6 +560,7 @@ export async function checkinButton_click(event) {
             $w('#outcomeSection').hide("fade",fadeOptions);
 
         });
+        await makeCheckinPilotsMembers(pilots);
 
 }
 

@@ -28,8 +28,22 @@ import sessions from "wix-bookings-backend";
 import wixCrmBackend from 'wix-crm-backend';
 import wixData from 'wix-data';
 import wixFetch from 'wix-fetch';
-
+import { members } from "wix-members.v2";
 import { mediaManager } from 'wix-media-backend';
+
+
+export async function checkIfMember(emailAddr){
+    const member = await members.queryMembers().eq("loginEmail", emailAddr);
+    if(member){
+        console.log("IS MEMBER")
+        return true;
+    }else{
+        console.log("IS NOT MEMBER")
+        return false;
+    }
+}
+
+
 
 export async function getDownloadUrl(videoUrl) {
     try {
@@ -177,6 +191,7 @@ export async function updateBookingInLiftOps(bookingId, checkin, firstNames, las
         },
         body: JSON.stringify(messageBody)
     };
+    return;
     return wixFetch.fetch("https://liftaircraft.j.layershift.co.uk/dispatch/bookingupdate", fetchOptions)
         .then(httpResponse => { return httpResponse });
 
