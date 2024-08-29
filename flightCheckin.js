@@ -79,7 +79,7 @@ export async function addPilotsToVideoDataset(pilots) {
 
 
 $w.onReady(function () {
-
+    $w("#saveNowButton").hide();
     $w('#dayTable').rows = [];
     $w('#dayTable').columns = [{
             "id": "id",
@@ -168,7 +168,7 @@ $w.onReady(function () {
             pilots["pilot1"].waiver = false;
         }
         console.log(pilots);
-        shouldShowCheckinButton();
+        shouldShowAddPilotsButton();
     });
     $w("#waiver2").onChange((event)=>{
          let isChecked = $w("#waiver2").checked;
@@ -179,7 +179,7 @@ $w.onReady(function () {
             pilots["pilot2"].waiver = false;
         }
         console.log(pilots);
-        shouldShowCheckinButton();
+        shouldShowAddPilotsButton();
     });
     $w("#waiver3").onChange((event)=>{
          let isChecked = $w("#waiver3").checked;
@@ -190,7 +190,7 @@ $w.onReady(function () {
             pilots["pilot3"].waiver = false;
         }
         console.log(pilots);
-        shouldShowCheckinButton();
+        shouldShowAddPilotsButton();
     });
     $w("#waiver4").onChange((event)=>{
          let isChecked = $w("#waiver4").checked;
@@ -201,7 +201,7 @@ $w.onReady(function () {
             pilots["pilot4"].waiver = false;
         }
         console.log(pilots);
-        shouldShowCheckinButton();
+        shouldShowAddPilotsButton();
     });
 
     $w('#email2').onChange((event)=>{
@@ -213,7 +213,7 @@ $w.onReady(function () {
             pilots["pilot2"].pilotEmail = null;
         }
         console.log(pilots);
-        shouldShowCheckinButton();
+        shouldShowAddPilotsButton();
     });
     $w('#email3').onChange((event)=>{
          let currentEmail = $w("#email3").value;
@@ -224,7 +224,7 @@ $w.onReady(function () {
             pilots["pilot3"].pilotEmail = null;
         }
         console.log(pilots);
-        shouldShowCheckinButton();
+        shouldShowAddPilotsButton();
     });
     $w('#email4').onChange((event)=>{
          let currentEmail = $w("#email4").value;
@@ -235,80 +235,80 @@ $w.onReady(function () {
             pilots["pilot4"].pilotEmail = null;
         }
         console.log(pilots);
-        shouldShowCheckinButton();
+        shouldShowAddPilotsButton();
     });
 
     $w("#firstName1").onChange((event)=>{
         let currentName = $w("#firstName1").value;
             pilots["pilot1"].firstName = currentName;
-            shouldShowCheckinButton();
+            shouldShowAddPilotsButton();
 
     })
 
        $w("#firstName2").onChange((event)=>{
         let currentName = $w("#firstName2").value;
             pilots["pilot2"].firstName = currentName;
-            shouldShowCheckinButton();
+            shouldShowAddPilotsButton();
     })
 
       $w("#firstName3").onChange((event)=>{
         let currentName = $w("#firstName3").value;
             pilots["pilot3"].firstName = currentName;
-            shouldShowCheckinButton();
+            shouldShowAddPilotsButton();
     })
 
           $w("#firstName4").onChange((event)=>{
         let currentName = $w("#firstName4").value;
             pilots["pilot4"].firstName = currentName;
-            shouldShowCheckinButton();
+            shouldShowAddPilotsButton();
     })
 
     $w("#lastName1").onChange((event)=>{
         let currentName = $w("#lastName1").value;
             pilots["pilot1"].lastName = currentName;
-            shouldShowCheckinButton();
+            shouldShowAddPilotsButton();
     })
 
         $w("#lastName2").onChange((event)=>{
         let currentName = $w("#lastName2").value;
             pilots["pilot2"].lastName = currentName;
-            shouldShowCheckinButton();
+            shouldShowAddPilotsButton();
     })
 
         $w("#lastName3").onChange((event)=>{
         let currentName = $w("#lastName3").value;
             pilots["pilot3"].lastName = currentName;
-            shouldShowCheckinButton();
+            shouldShowAddPilotsButton();
     })
 
         $w("#lastName4").onChange((event)=>{
         let currentName = $w("#lastName4").value;
             pilots["pilot4"].lastName = currentName;
-            shouldShowCheckinButton();
+            shouldShowAddPilotsButton();
     })
 
     $w("#weight1").onChange((event)=>{
         let currentWeight = $w('#weight1').value;
         pilots["pilot1"].weight = currentWeight;
-        shouldShowCheckinButton();
+        shouldShowAddPilotsButton();
     });
 
         $w("#weight2").onChange((event)=>{
         let currentWeight = $w('#weight2').value;
         pilots["pilot2"].weight = currentWeight;
-        shouldShowCheckinButton();
+        shouldShowAddPilotsButton();
     });
 
         $w("#weight3").onChange((event)=>{
         let currentWeight = $w('#weight3').value;
         pilots["pilot3"].weight = currentWeight;
-        shouldShowCheckinButton();
+        shouldShowAddPilotsButton();
     });
 
         $w("#weight4").onChange((event)=>{
         let currentWeight = $w('#weight4').value;
         pilots["pilot4"].weight = currentWeight;
-        shouldShowCheckinButton();
+        shouldShowAddPilotsButton();
     });
 
 
@@ -434,13 +434,10 @@ export async function refreshBookingInputTable(book) {
     $w('#group2').collapse();
     $w('#group3').collapse();
     $w('#group4').collapse();
-    $w('#notesText').value = "";
+    
 
     let emails = await getCompanion(book._id);
     let waivers = await getWaivers(book._id);
-    let notes = await getNotes(book._id);
-    
-    if(notes != undefined) $w('#notesText').value = notes;
 
     for (let i = 2; i < 5; i++) {
         $w('#firstName' + i.toString()).value = "";
@@ -517,7 +514,7 @@ export async function saveNowButton_click(event) {
     let genders = [];
     let weights = [];
     let waivers = [];
-    let notes = $w('#notesText').value;
+    let notes = '';
 
     for (let i = 1; i < 5; i++) {
         if ($w('#email' + i.toString()).value.length > 0) {
@@ -571,7 +568,7 @@ export async function checkinButton_click(event) {
     let genders = [];
     let weights = [];
     let waivers = [];
-    let notes = $w('#notesText').value;
+    let notes = '';
 
     for (let i = 1; i < 5; i++) {
         if ($w('#email' + i.toString()).value.length > 0) {
@@ -616,15 +613,17 @@ export function validateEmail(email) {
     }
 }
 
-export function shouldShowCheckinButton(){
+export function shouldShowAddPilotsButton(){
  let allValid = true;
 for (let pilot in pilots) {
         let pilotInfo = pilots[pilot];
         for (let key in pilotInfo) {
-                if (!pilotInfo[key]) { 
+            if(key === "firstName" || key === "lastName" || key === "pilotEmail" || key === "weight"){
+                    if (!pilotInfo[key]) { 
                     allValid = false;
                     break; 
-                }     
+                } 
+            }
         }
         if (!allValid) {
             break; // Exit the outer loop early if a false value is found
@@ -632,8 +631,8 @@ for (let pilot in pilots) {
 }
 console.log("ALL VALID?", allValid);
 if(allValid){
-    $w('#checkinButton').show();
+    $w('#saveNowButton').show();
 }else if(!allValid){
-    $w('#checkinButton').hide();
+    $w('#saveNowButton').hide();
 }
 }
