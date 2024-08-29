@@ -1,24 +1,40 @@
 import wixMembers from 'wix-members';
 import wixData from 'wix-data';
-import { getBookings, getWaivers, getNotes, getBooking, getCompanion, saveCompanion, getContact, getContactByEmail, getSessionOfBooking } from "backend/backend.jsw"
+import { getBookings, getWaivers, getNotes, getBooking, getCompanion, saveCompanion, 
+getContact, getContactByEmail, getSessionOfBooking,} from "backend/backend.jsw"
+import { myCreateMemberFunction} from "backend/webmethods.web"
+
+
 
 let booking = null;
 let contact = null;
 let pilots = {};
+let location;
 
-export async function addPilotsToVideoDataset(allPilots) {
-    const {emails, firstNames, lastNames} = allPilots;
-    for(let i = 0; i < emails.length; i++){
-        let pilot = {
-            pilotEmail: emails[i],
-            firstName: firstNames[i],
-            lastName: lastNames[i]
+//currently hardcoded for testing
+const memberData = {
+        member: {
+            loginEmail: "examplemember@example.com",
+            privacyStatus: "PUBLIC"
         }
-    await wixData.insert("FlightVideos", pilot).then(info=>{console.log("Added Pilot Video:", info)})
-    .catch((err)=>{console.log(err)});
+    };
+
+
+export async function addPilotsToVideoDataset(pilots) {
+    for (let pilot of Object.values(pilots)) {
+        await wixData.insert("FlightVideos", {
+            firstName: pilot.firstName,
+            lastName: pilot.lastName,
+            pilotEmail: pilot.pilotEmail,
+            location
+        }).then(info => {
+            console.log("Added Pilot Video:", info);
+        }).catch((err) => {
+            console.log(err);
+        });
     }
-    
 }
+
 
 $w.onReady(function () {
 
@@ -150,9 +166,9 @@ $w.onReady(function () {
         let currentEmail = $w("#email2").value;
         console.log("CURRENT EMAIL:", currentEmail);
         if(validateEmail(currentEmail)){
-            pilots["pilot2"].email = true;
+            pilots["pilot2"].pilotEmail = currentEmail;
         }else{
-            pilots["pilot2"].email = false;
+            pilots["pilot2"].pilotEmail = null;
         }
         console.log(pilots);
         shouldShowCheckinButton();
@@ -161,9 +177,9 @@ $w.onReady(function () {
          let currentEmail = $w("#email3").value;
          console.log("CURRENT EMAIL:", currentEmail);
         if(validateEmail(currentEmail)){
-            pilots["pilot3"].email = true;
+            pilots["pilot3"].pilotEmail = currentEmail;
         }else{
-            pilots["pilot3"].email = false;
+            pilots["pilot3"].pilotEmail = null;
         }
         console.log(pilots);
         shouldShowCheckinButton();
@@ -172,13 +188,87 @@ $w.onReady(function () {
          let currentEmail = $w("#email4").value;
          console.log("CURRENT EMAIL:", currentEmail);
         if(validateEmail(currentEmail)){
-            pilots["pilot4"].email = true;
+            pilots["pilot4"].pilotEmail = currentEmail;
         }else{
-            pilots["pilot4"].email = false;
+            pilots["pilot4"].pilotEmail = null;
         }
         console.log(pilots);
         shouldShowCheckinButton();
     });
+
+    $w("#firstName1").onChange((event)=>{
+        let currentName = $w("#firstName1").value;
+            pilots["pilot1"].firstName = currentName;
+            shouldShowCheckinButton();
+
+    })
+
+       $w("#firstName2").onChange((event)=>{
+        let currentName = $w("#firstName2").value;
+            pilots["pilot2"].firstName = currentName;
+            shouldShowCheckinButton();
+    })
+
+      $w("#firstName3").onChange((event)=>{
+        let currentName = $w("#firstName3").value;
+            pilots["pilot3"].firstName = currentName;
+            shouldShowCheckinButton();
+    })
+
+          $w("#firstName4").onChange((event)=>{
+        let currentName = $w("#firstName4").value;
+            pilots["pilot4"].firstName = currentName;
+            shouldShowCheckinButton();
+    })
+
+    $w("#lastName1").onChange((event)=>{
+        let currentName = $w("#lastName1").value;
+            pilots["pilot1"].lastName = currentName;
+            shouldShowCheckinButton();
+    })
+
+        $w("#lastName2").onChange((event)=>{
+        let currentName = $w("#lastName2").value;
+            pilots["pilot2"].lastName = currentName;
+            shouldShowCheckinButton();
+    })
+
+        $w("#lastName3").onChange((event)=>{
+        let currentName = $w("#lastName3").value;
+            pilots["pilot3"].lastName = currentName;
+            shouldShowCheckinButton();
+    })
+
+        $w("#lastName4").onChange((event)=>{
+        let currentName = $w("#lastName4").value;
+            pilots["pilot4"].lastName = currentName;
+            shouldShowCheckinButton();
+    })
+
+    $w("#weight1").onChange((event)=>{
+        let currentWeight = $w('#weight1').value;
+        pilots["pilot1"].weight = currentWeight;
+        shouldShowCheckinButton();
+    });
+
+        $w("#weight2").onChange((event)=>{
+        let currentWeight = $w('#weight2').value;
+        pilots["pilot2"].weight = currentWeight;
+        shouldShowCheckinButton();
+    });
+
+        $w("#weight3").onChange((event)=>{
+        let currentWeight = $w('#weight3').value;
+        pilots["pilot3"].weight = currentWeight;
+        shouldShowCheckinButton();
+    });
+
+        $w("#weight4").onChange((event)=>{
+        let currentWeight = $w('#weight4').value;
+        pilots["pilot4"].weight = currentWeight;
+        shouldShowCheckinButton();
+    });
+
 
 });
 
@@ -282,6 +372,9 @@ export function dayTable_rowSelect(event) {
     getBooking(event.rowData.id)
         .then(result => {
             booking = result;
+            console.log("BOOKING:", booking)
+            location = booking.bookedEntity.location.businessLocation.name;
+            console.log("LOCATION:", location)
             refreshBookingInputTable(booking);
             $w('#bookingDataSection').expand();
         });
@@ -292,7 +385,7 @@ export async function refreshBookingInputTable(book) {
 
     let partySize = book.totalParticipants;
     for(let i = 1; i <= partySize; i++){
-        pilots[`pilot${i}`] = {email: false, waiver: false}
+        pilots[`pilot${i}`] = {firstName: null, lastName: null, pilotEmail: null, waiver: false, weight: null}
     }
     console.log("PILOTS", pilots);
 
@@ -341,7 +434,7 @@ export async function refreshBookingInputTable(book) {
             $w('#email1').value = contact.primaryInfo.email;
             $w('#waiver1').checked = (waivers == undefined) ? false : waivers[0];
             $w('#weight1').value = (contact.info.extendedFields["custom.lastknownwt"] === undefined) ? "" : contact.info.extendedFields["custom.lastknownwt"];
-            pilots["pilot1"].email = true;
+            pilots["pilot1"] = {firstName: contact.info.name.first, lastName: contact.info.name.last, pilotEmail: contact.primaryInfo.email, waiver: false, weight: contact.info.extendedFields["custom.lastknownwt"]};
         });
         console.log("PILOTS:", pilots)
 }
@@ -425,6 +518,11 @@ export async function saveNowButton_click(event) {
 *	 @param {$w.MouseEvent} event
 */
 export async function checkinButton_click(event) {
+    console.log("executing ONCLICK")
+    myCreateMemberFunction(memberData);
+    //attempting to make a new member and returning early for testing purposes:
+    //makeCheckinPilotsMembers(pilots);
+    return;
     let emails = [];
     let firstNames = [];
     let lastNames = [];
@@ -445,11 +543,6 @@ export async function checkinButton_click(event) {
     }
 
         //adding the checked in pilots to flight videos for simple association and uploading
-        let pilots = {
-            emails,
-            firstNames,
-            lastNames
-        }
         //this function will loop through the arrays and create a video template to easily track who needs a video
         //and upload the video. When they log in later, the videos will automatically filter to their own video.
         await addPilotsToVideoDataset(pilots);
@@ -467,6 +560,7 @@ export async function checkinButton_click(event) {
             $w('#outcomeSection').hide("fade",fadeOptions);
 
         });
+        await makeCheckinPilotsMembers(pilots);
 
 }
 
