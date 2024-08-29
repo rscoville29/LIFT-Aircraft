@@ -35,10 +35,12 @@ export async function checkAndMakeMembers(pilots) {
             let member = await myQueryMembersFunction(options);
             if(member._items.length > 0){
                 console.log("IS member:", member)
+                pilot.id = member._items[0]._id;
             }else{
                 console.log("Is not member:", member)
             }
         }
+        console.log("Pilots after loop:", pilots)
         return;
     } catch (error) {
         console.error("Error in makeCheckinPilotsMembers:", error);
