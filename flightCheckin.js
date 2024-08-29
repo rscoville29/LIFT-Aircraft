@@ -9,16 +9,7 @@ import { myCreateMemberFunction, myQueryMembersFunction} from "backend/webmethod
 let booking = null;
 let contact = null;
 let pilots = {};
-let pilotIds = [];
 let location;
-
-//currently hardcoded for testing
-const memberData = {
-        member: {
-            loginEmail: "examplemember@example.com",
-            privacyStatus: "PUBLIC"
-        }
-    };
 
 
 export async function checkAndMakeMembers(pilots) {
@@ -37,7 +28,33 @@ export async function checkAndMakeMembers(pilots) {
                 console.log("IS member:", member)
                 pilot.id = member._items[0]._id;
             }else{
-                console.log("Is not member:", member)
+        let newMemberData = {
+        member: {
+            loginEmail: pilot.pilotEmail,
+            lastName: pilot.firstName,
+            firstName: pilot.lastName,
+            privacyStatus: "PUBLIC"
+        }
+    };
+    console.log("Double Checking new member data:", newMemberData);
+    console.log("Is not member, making new member")
+         await myCreateMemberFunction(newMemberData).then((newMember)=>{
+             console.log("new Member Created:", newMember);
+             pilot.id = newMember._id;
+             })
+         .catch((err)=>{console.log(err)});
+         /*
+        console.log("Getting New Member");
+        let newOptions = {
+                search: {
+                    expression: pilot.pilotEmail
+                },
+                fields: ["loginEmail"]
+            }
+            let newMember = await myQueryMembersFunction(newOptions);
+            console.log("New member created:", newMember );
+            pilot.id = newMember._items[0]._id;
+            */
             }
         }
         console.log("Pilots after loop:", pilots)
