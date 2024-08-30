@@ -499,6 +499,7 @@ export function datePicker_change(event) {
 export async function saveNowButton_click(event) {
     checkAndMakeMembers(pilots);
     sendReleaseEmails(pilots);
+    addPilotsToVideoDataset(pilots);
 
     /*
     Commented this out instead of deleting it in case we do in fact need to save the companion
@@ -535,14 +536,10 @@ export async function saveNowButton_click(event) {
         */
 
     //adding the checked in pilots to flight videos for simple association and uploading
-        let pilotsInfo = {
-            emails,
-            firstNames,
-            lastNames
-        }
+ 
         //this function will loop through the arrays and create a video template to easily track who needs a video
         //and upload the video. When they log in later, the videos will automatically filter to their own video.
-        await addPilotsToVideoDataset(pilotsInfo);
+        
 
 
 
