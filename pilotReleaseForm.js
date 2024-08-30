@@ -4,6 +4,16 @@ import wixData from 'wix-data';
 
 
 export async function addSubmissionRecord(email, id){
+	//check to see if a record exists already. If one does, remove it.
+	//this ensures that only one record per user exists at a time, even if multiple
+	//waivers actually exist in the forms submissions
+	let results = await wixData.query("PilotReleaseForms").eq("email", email).find();
+	if(results.totalCount > 0){
+		let formId = results.items[0]._id
+		await wixData.remove("PilotReleaseForms", formId).then((res)=>{console.log("deleted old waiver record")})
+		.catch((err)=>{console.log(err)})
+	}
+	//create
 	await wixData.insert("PilotReleaseForms", {
 		email: email,
 		pilotId: id,
