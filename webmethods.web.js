@@ -60,3 +60,18 @@ export const myQueryMembersFunction = webMethod(
     }
   },
 );
+
+export const getCurrentMemberInfo = webMethod(
+  Permissions.Anyone,
+  async () => {
+    try {
+      const member = await members.getCurrentMember();
+      console.log("Retrieved currently logged in member:", member);
+
+      return member;
+    } catch (error) {
+      console.error(error);
+      // Handle the error
+    }
+  },
+);
