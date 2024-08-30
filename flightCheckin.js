@@ -36,7 +36,7 @@ export async function sendNewMemberEmails(pilots){
 export async function checkFormsAndSendReleaseEmails(pilots){
     for (let pilot of Object.values(pilots)) {
         //first check for an existing waiver
-        let existingForm = wixData.query("PilotReleaseForms").eq("email", pilot.pilotEmail);
+        let existingForm = await wixData.query("PilotReleaseForms").eq("email", pilot.pilotEmail);
         console.log("existing form query:", existingForm);
         if(existingForm){
             //check age of submission
@@ -87,7 +87,7 @@ export async function checkAndMakeMembers(pilots) {
             }
         }
         console.log("Pilots after loop:", pilots)
-        return;
+        checkFormsAndSendReleaseEmails(pilots);
     } catch (error) {
         console.error("Error in makeCheckinPilotsMembers:", error);
         throw error;  // Re-throw the error to ensure it's properly logged and handled.
@@ -502,7 +502,6 @@ export function datePicker_change(event) {
 */
 export async function saveNowButton_click(event) {
     checkAndMakeMembers(pilots);
-    checkFormsAndSendReleaseEmails(pilots);
     //addPilotsToVideoDataset(pilots);
 
     /*
@@ -556,6 +555,8 @@ export async function saveNowButton_click(event) {
 */
 export async function checkinButton_click(event) {
         sendNewMemberEmails(pilots);
+
+        
     //attempting to make a new member and returning early for testing purposes:
     //makeCheckinPilotsMembers(pilots);
     return;
