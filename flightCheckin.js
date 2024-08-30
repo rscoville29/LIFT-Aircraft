@@ -16,11 +16,7 @@ let pilots = {};
 let location;
 
 export async function checkForWaivers(){
-try {
-    
-} catch (error) {
-    console.log(error);
-}
+
 }
 
 
@@ -37,13 +33,21 @@ export async function sendNewMemberEmails(pilots){
 }
 
 
-export function sendReleaseEmails(pilots){
+export async function checkFormsAndSendReleaseEmails(pilots){
     for (let pilot of Object.values(pilots)) {
-           triggeredEmails.emailMember('pilotsReleaseForm', pilot.id, {
+        //first check for an existing waiver
+        let existingForm = wixData.query("PilotReleaseForms").eq("email", pilot.pilotEmail);
+        console.log("existing form query:", existingForm);
+        if(existingForm){
+            //check age of submission
+            
+        }
+           /*triggeredEmails.emailMember('pilotsReleaseForm', pilot.id, {
   variables: {
         memberName: pilot.firstName
   }
 });
+*/
     }
 }
 
@@ -498,8 +502,8 @@ export function datePicker_change(event) {
 */
 export async function saveNowButton_click(event) {
     checkAndMakeMembers(pilots);
-    sendReleaseEmails(pilots);
-    addPilotsToVideoDataset(pilots);
+    checkFormsAndSendReleaseEmails(pilots);
+    //addPilotsToVideoDataset(pilots);
 
     /*
     Commented this out instead of deleting it in case we do in fact need to save the companion
