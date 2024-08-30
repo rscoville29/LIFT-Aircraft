@@ -36,18 +36,53 @@ export async function sendNewMemberEmails(pilots){
 export async function checkFormsAndSendReleaseEmails(pilots){
     for (let pilot of Object.values(pilots)) {
         //first check for an existing waiver
-        let existingForm = await wixData.query("PilotReleaseForms").eq("email", pilot.pilotEmail);
-        console.log("existing form query:", existingForm);
-        if(existingForm){
+        const formInfo = await wixData.query("PilotReleaseForms").eq("email", pilot.pilotEmail).find()
+        .then((results)=>{
+        if(results.totalCount === 1){
+            let createdAtDate = results.items[0]._createdDate;
+            console.log("results:", results);
+            let formId = results.items[0]._id
+            console.log("formid:", formId);
             //check age of submission
-            
-        }
-           /*triggeredEmails.emailMember('pilotsReleaseForm', pilot.id, {
-  variables: {
+            let unixCreationDate = Math.floor(new Date(createdAtDate).getTime() / 1000);
+            //seconds in a year:
+            const epochYear = 31536000;
+            let currentEpoch = Math.floor(new Date().getTime() / 1000)
+            if(currentEpoch - unixCreationDate >= epochYear){
+                //the form is expired. Destroy the form and send an email for a new form
+                return { isExpired: true, id: formId}
+            }else{
+                //form is not expired
+                return {isExpired: false}
+            }
+        }else{
+            // no waiver on file for pilot, send email to request waiver
+        triggeredEmails.emailMember('pilotsReleaseForm', pilot.id, {
+        variables: {
         memberName: pilot.firstName
   }
-});
-*/
+}).then((res)=>{console.log("Waiver email sent to member", res)}).catch((err)=>{console.log(err)});
+        }
+            })
+        .catch((err)=>{console.log(err)});
+
+        if(formInfo){
+            if(formInfo.isExpired){
+            await wixData.remove("PilotReleaseForms", formInfo.id)
+            .then((res)=>{console.log("form deleted", res)})
+            .catch((err)=>{console.log(err)});
+            //send email to request waiver
+        triggeredEmails.emailMember('pilotsReleaseForm', pilot.id, {
+        variables: {
+        memberName: pilot.firstName
+  }
+}).then((res)=>{console.log("Waiver email sent to member", res)}).catch((err)=>{console.log(err)});
+            }else{
+                //pilot has a current waiver
+                pilot.waiver = true;
+            }
+        }
+
     }
 }
 
@@ -556,7 +591,7 @@ export async function saveNowButton_click(event) {
 export async function checkinButton_click(event) {
         sendNewMemberEmails(pilots);
 
-        
+
     //attempting to make a new member and returning early for testing purposes:
     //makeCheckinPilotsMembers(pilots);
     return;
