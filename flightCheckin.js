@@ -4,6 +4,9 @@ import { getBookings, getWaivers, getNotes, getBooking, getCompanion, saveCompan
 getContact, getContactByEmail, getSessionOfBooking,} from "backend/backend.jsw"
 import { myCreateMemberFunction, myQueryMembersFunction} from "backend/webmethods.web"
 import { authentication } from "wix-members-frontend";
+import { triggeredEmails } from 'wix-crm';
+//...
+
 
 
 
@@ -12,10 +15,36 @@ let contact = null;
 let pilots = {};
 let location;
 
-export async function sendNewMemberEmail(newMember){
-    await authentication.sendSetPasswordEmail(newMember.loginEmail)
+export async function checkForWaivers(){
+try {
+    
+} catch (error) {
+    console.log(error);
+}
+}
+
+
+//This sends an email to each newly created member prompting them to add a password
+export async function sendNewMemberEmails(pilots){
+    for (let pilot of Object.values(pilots)) {
+        if(pilot.isNewMember){
+            await authentication.sendSetPasswordEmail(pilot.pilotEmail)
              .then((status)=>{if(status){console.log("Email Sent!")}})
              .catch((err)=>{console.log(err)});
+        }
+    }
+
+}
+
+
+export function sendReleaseEmails(pilots){
+    for (let pilot of Object.values(pilots)) {
+           triggeredEmails.emailMember('pilotsReleaseForm', pilot.id, {
+  variables: {
+        memberName: pilot.firstName
+  }
+});
+    }
 }
 
 
@@ -48,7 +77,7 @@ export async function checkAndMakeMembers(pilots) {
          await myCreateMemberFunction(newMemberData).then((newMember)=>{
              console.log("new Member Created:", newMember);
              pilot.id = newMember._id;
-             sendNewMemberEmail(newMember);
+             pilot.isNewMember = true;
              })
          .catch((err)=>{console.log(err)});
             }
@@ -79,6 +108,10 @@ export async function addPilotsToVideoDataset(pilots) {
 
 
 $w.onReady(function () {
+    $w("#image59").hide();
+    $w("#image60").hide();
+    $w("#image61").hide();
+    $w("#image62").hide();
     $w("#saveNowButton").hide();
     $w('#dayTable').rows = [];
     $w('#dayTable').columns = [{
@@ -159,50 +192,6 @@ $w.onReady(function () {
     ];
 
     setCalendarToDate($w('#datePicker').value);
-    $w("#waiver1").onChange((event)=>{
-        let isChecked = $w("#waiver1").checked;
-        console.log("IS CHECKED?", isChecked);
-        if(isChecked){
-            pilots["pilot1"].waiver = true;
-        }else{
-            pilots["pilot1"].waiver = false;
-        }
-        console.log(pilots);
-        shouldShowAddPilotsButton();
-    });
-    $w("#waiver2").onChange((event)=>{
-         let isChecked = $w("#waiver2").checked;
-        console.log("IS CHECKED?", isChecked);
-        if(isChecked){
-            pilots["pilot2"].waiver = true;
-        }else{
-            pilots["pilot2"].waiver = false;
-        }
-        console.log(pilots);
-        shouldShowAddPilotsButton();
-    });
-    $w("#waiver3").onChange((event)=>{
-         let isChecked = $w("#waiver3").checked;
-        console.log("IS CHECKED?", isChecked);
-        if(isChecked){
-            pilots["pilot3"].waiver = true;
-        }else{
-            pilots["pilot3"].waiver = false;
-        }
-        console.log(pilots);
-        shouldShowAddPilotsButton();
-    });
-    $w("#waiver4").onChange((event)=>{
-         let isChecked = $w("#waiver4").checked;
-        console.log("IS CHECKED?", isChecked);
-        if(isChecked){
-            pilots["pilot4"].waiver = true;
-        }else{
-            pilots["pilot4"].waiver = false;
-        }
-        console.log(pilots);
-        shouldShowAddPilotsButton();
-    });
 
     $w('#email2').onChange((event)=>{
         let currentEmail = $w("#email2").value;
@@ -508,6 +497,11 @@ export function datePicker_change(event) {
 *	 @param {$w.MouseEvent} event
 */
 export async function saveNowButton_click(event) {
+    checkAndMakeMembers(pilots);
+    sendReleaseEmails(pilots);
+
+    /*
+    Commented this out instead of deleting it in case we do in fact need to save the companion
     let emails = [];
     let firstNames = [];
     let lastNames = [];
@@ -526,17 +520,7 @@ export async function saveNowButton_click(event) {
             waivers.push($w('#waiver' + i.toString()).checked);
         }
     }
-    //adding the checked in pilots to flight videos for simple association and uploading
-        let pilots = {
-            emails,
-            firstNames,
-            lastNames
-        }
-        //this function will loop through the arrays and create a video template to easily track who needs a video
-        //and upload the video. When they log in later, the videos will automatically filter to their own video.
-        await addPilotsToVideoDataset(pilots);
-
-    saveCompanion(booking._id, 0, notes, firstNames, lastNames, genders, emails, weights, waivers)
+        saveCompanion(booking._id, 0, notes, firstNames, lastNames, genders, emails, weights, waivers)
         .then(result => {
             $w('#resultText').text = result;
             $w('#outcomeSection').expand();
@@ -548,6 +532,19 @@ export async function saveNowButton_click(event) {
             $w('#outcomeSection').hide("fade",fadeOptions);
             console.log(result);
         });
+        */
+
+    //adding the checked in pilots to flight videos for simple association and uploading
+        let pilotsInfo = {
+            emails,
+            firstNames,
+            lastNames
+        }
+        //this function will loop through the arrays and create a video template to easily track who needs a video
+        //and upload the video. When they log in later, the videos will automatically filter to their own video.
+        await addPilotsToVideoDataset(pilotsInfo);
+
+
 
 }
 
@@ -557,8 +554,7 @@ export async function saveNowButton_click(event) {
 *	 @param {$w.MouseEvent} event
 */
 export async function checkinButton_click(event) {
-    console.log("executing ONCLICK")
-    checkAndMakeMembers(pilots);
+        sendNewMemberEmails(pilots);
     //attempting to make a new member and returning early for testing purposes:
     //makeCheckinPilotsMembers(pilots);
     return;
