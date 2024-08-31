@@ -16,29 +16,30 @@ let pilots = {};
 let location;
 
 export async function waiversLoop(pilots){
-    let showCheckin = false;
+    const keys = Object.keys(pilots);
+    const waiversNeeded = keys.length;
+    let waiversSubmitted = 0;
+    while(waiversSubmitted < waiversNeeded){
+    //looping initially to modify the waivers submitted count, determining if we need to loop
+for (let pilot of Object.values(pilots)){
+            if(pilot.waiver && pilot.needsWaiver){
+                waiversSubmitted++
+                pilot.needsWaiver = false;
+            }
+        }
 
-    while(!showCheckin){
-
-const keys = Object.keys(pilots);
 for (let key of keys) {
 
-      setTimeout(() => {
-            console.log("timing out")
-        }, 3000);
-        
     let pilot = pilots[key]; // Access the value associated with the key
 
     if (!pilot.waiver) {
         console.log("Waiver is false!");
-        showCheckin = false;
 
         await wixData.query("PilotReleaseForms")
             .eq("email", pilot.pilotEmail)
             .find()
             .then((res) => {
                 if (res && res.totalCount === 1) {
-                    showCheckin = true;
                     pilots[key].waiver = true;
                     console.log("PILOT KEY:", key); // Log the key
                      if (key === 'pilot1') {
@@ -56,6 +57,8 @@ for (let key of keys) {
                 console.log(err);
             });
     }else{
+        console.log("pilot Has a waiver! Should show checkmark");
+        pilots[key].waiver = true;
              if (key === 'pilot1') {
                         $w("#image59").show();
                     } else if (key === 'pilot2') {
@@ -68,6 +71,10 @@ for (let key of keys) {
 
     }
 }
+//seetting a timeout before looping agin so we don't exceed the call-stack
+      setTimeout(() => {
+            console.log("timing out")
+        }, 5000);
 
     }
     //once we break out of the loop
@@ -93,6 +100,7 @@ export async function sendNewMemberEmails(pilots){
 
 
 export async function checkFormsAndSendReleaseEmails(pilots){
+    console.log("executing checking forms, pilots:", pilots);
     for (let pilot of Object.values(pilots)) {
         //first check for an existing waiver
         const formInfo = await wixData.query("PilotReleaseForms").eq("email", pilot.pilotEmail).find()
@@ -521,7 +529,7 @@ export async function refreshBookingInputTable(book) {
 
     let partySize = book.totalParticipants;
     for(let i = 1; i <= partySize; i++){
-        pilots[`pilot${i}`] = {firstName: null, lastName: null, pilotEmail: null, waiver: false, weight: null}
+        pilots[`pilot${i}`] = {firstName: null, lastName: null, pilotEmail: null, waiver: false, weight: null, needsWaiver: true}
     }
     console.log("PILOTS", pilots);
 
@@ -567,7 +575,7 @@ export async function refreshBookingInputTable(book) {
             $w('#email1').value = contact.primaryInfo.email;
             //$w('#waiver1').checked = (waivers == undefined) ? false : waivers[0];
             $w('#weight1').value = (contact.info.extendedFields["custom.lastknownwt"] === undefined) ? "" : contact.info.extendedFields["custom.lastknownwt"];
-            pilots["pilot1"] = {firstName: contact.info.name.first, lastName: contact.info.name.last, pilotEmail: contact.primaryInfo.email, waiver: false, weight: contact.info.extendedFields["custom.lastknownwt"]};
+            pilots["pilot1"] = {firstName: contact.info.name.first, lastName: contact.info.name.last, pilotEmail: contact.primaryInfo.email, waiver: false, weight: contact.info.extendedFields["custom.lastknownwt"], needsWaiver: true};
         });
         console.log("PILOTS:", pilots)
 }
