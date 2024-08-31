@@ -15,7 +15,66 @@ let contact = null;
 let pilots = {};
 let location;
 
-export async function checkForWaivers(){
+export async function waiversLoop(pilots){
+    let showCheckin = false;
+
+    while(!showCheckin){
+
+const keys = Object.keys(pilots);
+for (let key of keys) {
+
+      setTimeout(() => {
+            console.log("timing out")
+        }, 3000);
+        
+    let pilot = pilots[key]; // Access the value associated with the key
+
+    if (!pilot.waiver) {
+        console.log("Waiver is false!");
+        showCheckin = false;
+
+        await wixData.query("PilotReleaseForms")
+            .eq("email", pilot.pilotEmail)
+            .find()
+            .then((res) => {
+                if (res && res.totalCount === 1) {
+                    showCheckin = true;
+                    pilots[key].waiver = true;
+                    console.log("PILOT KEY:", key); // Log the key
+                     if (key === 'pilot1') {
+                        $w("#image59").show();
+                    } else if (key === 'pilot2') {
+                        $w("#image60").show();
+                    } else if (key === 'pilot3') {
+                        $w("#image61").show();
+                    } else if (key === 'pilot4') {
+                        $w("#image62").show();
+                    }
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }else{
+             if (key === 'pilot1') {
+                        $w("#image59").show();
+                    } else if (key === 'pilot2') {
+                        $w("#image60").show();
+                    } else if (key === 'pilot3') {
+                        $w("#image61").show();
+                    } else if (key === 'pilot4') {
+                        $w("#image62").show();
+                    }
+
+    }
+}
+
+    }
+    //once we break out of the loop
+    $w("#image63").hide();
+    $w("#text345").hide();
+    $w("#text346").hide();
+    $w("#checkinButton").show();
 
 }
 
@@ -84,6 +143,10 @@ export async function checkFormsAndSendReleaseEmails(pilots){
         }
 
     }
+    $w("#image63").show();
+    $w("#text345").show();
+    $w("#text346").show();
+    waiversLoop(pilots);
 }
 
 
@@ -147,6 +210,9 @@ export async function addPilotsToVideoDataset(pilots) {
 
 
 $w.onReady(function () {
+    $w("#image63").hide();
+    $w("#text345").hide();
+    $w("#text346").hide();
     $w("#image59").hide();
     $w("#image60").hide();
     $w("#image61").hide();
@@ -499,7 +565,7 @@ export async function refreshBookingInputTable(book) {
             $w('#lastName1').value = contact.info.name.last;
             $w('#gender1').value = (contact.info.extendedFields["custom.gender"] === undefined) ? "undisclosed" : contact.info.extendedFields["custom.gender"];
             $w('#email1').value = contact.primaryInfo.email;
-            $w('#waiver1').checked = (waivers == undefined) ? false : waivers[0];
+            //$w('#waiver1').checked = (waivers == undefined) ? false : waivers[0];
             $w('#weight1').value = (contact.info.extendedFields["custom.lastknownwt"] === undefined) ? "" : contact.info.extendedFields["custom.lastknownwt"];
             pilots["pilot1"] = {firstName: contact.info.name.first, lastName: contact.info.name.last, pilotEmail: contact.primaryInfo.email, waiver: false, weight: contact.info.extendedFields["custom.lastknownwt"]};
         });
