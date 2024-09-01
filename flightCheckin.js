@@ -33,8 +33,6 @@ for (let key of keys) {
     let pilot = pilots[key]; // Access the value associated with the key
 
     if (!pilot.waiver) {
-        console.log("Waiver is false!");
-
         await wixData.query("PilotReleaseForms")
             .eq("email", pilot.pilotEmail)
             .find()
@@ -57,7 +55,6 @@ for (let key of keys) {
                 console.log(err);
             });
     }else{
-        console.log("pilot Has a waiver! Should show checkmark");
         pilots[key].waiver = true;
              if (key === 'pilot1') {
                         $w("#image59").show();
@@ -73,7 +70,7 @@ for (let key of keys) {
 }
 //seetting a timeout before looping agin so we don't exceed the call-stack
       setTimeout(() => {
-            console.log("timing out")
+          return;
         }, 5000);
 
     }
@@ -154,6 +151,7 @@ export async function checkFormsAndSendReleaseEmails(pilots){
     $w("#image63").show();
     $w("#text345").show();
     $w("#text346").show();
+    $w("#saveNowButton").hide();
     waiversLoop(pilots);
 }
 
@@ -611,7 +609,6 @@ export function datePicker_change(event) {
 */
 export async function saveNowButton_click(event) {
     checkAndMakeMembers(pilots);
-    //addPilotsToVideoDataset(pilots);
 
     /*
     Commented this out instead of deleting it in case we do in fact need to save the companion
@@ -647,14 +644,6 @@ export async function saveNowButton_click(event) {
         });
         */
 
-    //adding the checked in pilots to flight videos for simple association and uploading
- 
-        //this function will loop through the arrays and create a video template to easily track who needs a video
-        //and upload the video. When they log in later, the videos will automatically filter to their own video.
-        
-
-
-
 }
 
 /**
@@ -664,6 +653,8 @@ export async function saveNowButton_click(event) {
 */
 export async function checkinButton_click(event) {
         sendNewMemberEmails(pilots);
+        addPilotsToVideoDataset(pilots);
+        //Create checked in CMS collection and manage check-ins
 
 
     //attempting to make a new member and returning early for testing purposes:
@@ -688,11 +679,6 @@ export async function checkinButton_click(event) {
         }
     }
 
-        //adding the checked in pilots to flight videos for simple association and uploading
-        //this function will loop through the arrays and create a video template to easily track who needs a video
-        //and upload the video. When they log in later, the videos will automatically filter to their own video.
-        await addPilotsToVideoDataset(pilots);
-
     saveCompanion(booking._id, emails.length, notes, firstNames, lastNames, genders, emails, weights, waivers)
         .then(result => {
 
@@ -706,7 +692,6 @@ export async function checkinButton_click(event) {
             $w('#outcomeSection').hide("fade",fadeOptions);
 
         });
-        await checkAndMakeMembers(pilots);
 
 }
 
