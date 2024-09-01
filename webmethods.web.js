@@ -67,8 +67,10 @@ export const getCurrentMemberInfo = webMethod(
     try {
       const member = await members.getCurrentMember();
       console.log("Retrieved currently logged in member:", member);
-
-      return member;
+      if(member){
+        return member;
+      }
+      
     } catch (error) {
       console.error(error);
       // Handle the error
