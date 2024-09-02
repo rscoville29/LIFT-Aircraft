@@ -1,0 +1,63 @@
+// Velo API Reference: https://www.wix.com/velo/reference/api-overview/introduction
+
+$w.onReady(async function () {
+
+    let values;
+    
+    $w("#input13").onChange(()=>{
+        let firstName = $w("#input13").value;
+		$w("#form6").setFieldValues("first_name_0190", adf);
+    })
+    
+    $w("#input14").onChange(()=>{
+        let lastName = $w("#input14").value;
+    })
+    
+    $w("#input15").onChange(()=>{
+        let email = $w("#input15").value;
+    })
+    
+    $w("#input16").onChange(()=>{
+        let phone = $w("#input16").value;
+    })
+    
+    $w("#input17").onChange(()=>{
+        let address = $w("#input17").value;
+    })
+    
+    $w("#input18").onChange(()=>{
+        let gender = $w("#input18").value;
+    })
+    
+    $w("#input19").onChange(()=>{
+        let weight = $w("#input19").value;
+    })
+    
+    $w("#datePicker1").onChange(()=>{
+        let birthday = $w("#datePicker1").value;
+    })
+    
+    $w("#input20").onChange(()=>{
+        let age = $w("#input20").value;
+    })
+    
+    $w("#input21").onChange(()=>{
+        let emergencyName = $w("#input21").value;
+    })
+    
+    $w("#input22").onChange(()=>{
+        let emergencyPhone = $w("#input22").value;
+    })
+    
+    
+    $w("#form6").onFieldValueChange(()=>{
+        values = $w("#form6").getFieldValues();
+        console.log(values);
+    });
+    
+    $w("#form6").onSubmitSuccess(()=>{
+        const {email_7e01} = values;
+        console.log("Email_7e01:", email_7e01);
+    })
+    
+    });
