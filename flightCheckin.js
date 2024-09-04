@@ -15,6 +15,21 @@ let contact = null;
 let pilots = {};
 let location;
 
+export async function checkInPilots(pilots){
+    const keys = Object.keys(pilots);
+    for(let key of keys){
+        let pilotEmail = pilots[key].pilotEmail;
+        await wixData.query("PilotReleaseForms").eq("email", pilotEmail).find()
+        .then(async (waiver)=>{
+            const {firstName, lastName, email, emergencyName, emergencyPhone, weight, age, phone} = waiver.items[0];
+            console.log("Retrieved Pilot Waiver", waiver);
+            await wixData.insert("CheckedInPilots", {firstName, lastName, email, emergencyName, emergencyPhone, weight, age, phone})
+            .then((res)=>{console.log("added pilot to checked in collection")}).catch((err)=>{console.log(err)})
+        }).catch((err)=>{console.log(err)});
+        
+    }
+}
+
 export async function waiversLoop(pilots){
     const keys = Object.keys(pilots);
     const waiversNeeded = keys.length;
@@ -70,6 +85,7 @@ for (let key of keys) {
 }
 //seetting a timeout before looping agin so we don't exceed the call-stack
       setTimeout(() => {
+          console.log("timing out");
           return;
         }, 5000);
 
@@ -216,6 +232,7 @@ export async function addPilotsToVideoDataset(pilots) {
 
 
 $w.onReady(function () {
+    $w("#text347").hide();
     $w("#image63").hide();
     $w("#text345").hide();
     $w("#text346").hide();
@@ -652,8 +669,12 @@ export async function saveNowButton_click(event) {
 *	 @param {$w.MouseEvent} event
 */
 export async function checkinButton_click(event) {
-        sendNewMemberEmails(pilots);
-        addPilotsToVideoDataset(pilots);
+        //await sendNewMemberEmails(pilots);
+        //await addPilotsToVideoDataset(pilots);
+        await checkInPilots(pilots);
+        $w("#checkinButton").hide();
+        $w("#text347").show();
+
         //Create checked in CMS collection and manage check-ins
 
 
