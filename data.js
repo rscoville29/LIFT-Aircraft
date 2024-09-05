@@ -32,7 +32,25 @@
 import { fetch } from 'wix-fetch';
 import { getSecret } from "wix-secrets-backend";
 import wixData from 'wix-data';
-    
+import {emailMemberOnVideoUpload} from './webmethods.web'
+
+ export async function getMemberIdByEmail(email){
+ try {
+    const result = await wixData.query('Members/PrivateMembersData')
+      .eq('loginEmail', email) 
+      .find();
+
+    if (result.items.length > 0) {
+      const member = result.items[0]; 
+      return member._id; 
+    } else {
+      return null; 
+    }
+  } catch (error) {
+    console.error('Error retrieving member ID:', error);
+    return null;
+  }
+ }   
 
 export async function generateDocumentFromTemplate(data) {
     const secret = await getSecret('Docupilot_Encoded_API_KEY');
@@ -105,7 +123,21 @@ export async function PilotReleaseForms_afterInsert(item, context) {
 
 	  console.log("DATA:", JSON.stringify(data));
 
-      //generateDocumentFromTemplate(data);
+      generateDocumentFromTemplate(data);
 
 
+}
+
+export async function FlightVideos_afterUpdate(item, context) {
+    console.log("Flight Video collection updated:", item)
+    if(item.video){
+        console.log("Video Exists")
+        console.log("item email:", item.pilotEmail)
+        const memberId = await getMemberIdByEmail(item.pilotEmail)
+        if(memberId){
+            console.log("found member id", memberId)
+        await emailMemberOnVideoUpload(memberId, item.firstName);
+        }
+        
+    }
 }
