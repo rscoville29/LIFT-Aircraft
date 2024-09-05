@@ -21,6 +21,26 @@ $w.onReady(async function () {
 import { Permissions, webMethod } from "wix-web-module";
 import { elevate } from "wix-auth";
 import { members } from "wix-members.v2";
+import { triggeredEmails } from "wix-crm-backend";
+
+export const emailMemberOnVideoUpload = webMethod(Permissions.Anyone, (id, name) => {
+  const emailId = "UMfkkiB";
+  const memberId = id;
+  const options = {
+    variables: {
+      name
+    },
+  };
+
+  return triggeredEmails
+    .emailMember(emailId, memberId, options)
+    .then(() => {
+      console.log("Email was sent to member");
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+});
 
 export const multiply = webMethod(
   Permissions.Anyone, 
