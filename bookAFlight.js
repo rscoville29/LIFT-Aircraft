@@ -590,42 +590,40 @@ function validateCheckout() {
     let valid = true;
 
     if (!$w('#txtFirstName').valid) {
-        $w('#txtFirstName').updateValidityIndication;
-        $w('#txtFirstName').scrollTo();
+        $w('#txtFirstName').updateValidityIndication();
 
         valid = false;
     }
 
     if (!$w('#txtLastName').valid) {
-        $w('#txtLastName').updateValidityIndication;
-        $w('#txtLastName').scrollTo();
+        $w('#txtLastName').updateValidityIndication();
         valid = false;
     }
 
     if (!$w('#txtEmail').valid) {
-        $w('#txtEmail').updateValidityIndication;
-        $w('#txtLastName').scrollTo();
+        $w('#txtEmail').updateValidityIndication();
         valid = false;
     }
 
     if (!$w('#txtPhoneNo').valid) {
-        $w('#txtPhoneNo').updateValidityIndication;
-        $w('#txtPhoneNo').scrollTo();
+        $w('#txtPhoneNo').updateValidityIndication();
         valid = false;
     }
 
     if (!$w('#chkWeight').valid) {
         $w('#chkWeight').updateValidityIndication;
-        $w('#chkWeight').scrollTo();
         $w('#chkWeight').updateValidityIndication();
         valid = false;
     }
 
     if (!$w('#chkWaiver').valid) {
         $w('#chkWaiver').updateValidityIndication;
-
-        $w('#chkWaiver').scrollTo();
         $w('#chkWaiver').updateValidityIndication();
+        valid = false;
+    }
+
+    if(!$w("#checkbox1").valid){
+        $w("#checkbox1").updateValidityIndication();
         valid = false;
     }
 
@@ -633,94 +631,6 @@ function validateCheckout() {
 
 }
 
-/**
-*	Adds an event handler that runs when an input element's value
- is changed.
-	[Read more](https://www.wix.com/corvid/reference/$w.ValueMixin.html#onChange)
-*	 @param {$w.Event} event
-*/
-export function txtFirstName_change(event) {
-    validateCheckout();
-}
-
-/**
-*	Adds an event handler that runs when an input element's value
- is changed.
-	[Read more](https://www.wix.com/corvid/reference/$w.ValueMixin.html#onChange)
-*	 @param {$w.Event} event
-*/
-export function txtLastName_change(event) {
-    // This function was added from the Properties & Events panel. To learn more, visit http://wix.to/UcBnC-4
-    // Add your code for this event here: 
-    const v = validateCheckout();
-
-}
-
-/**
-*	Adds an event handler that runs when an input element's value
- is changed.
-	[Read more](https://www.wix.com/corvid/reference/$w.ValueMixin.html#onChange)
-*	 @param {$w.Event} event
-*/
-export function txtEmail_change(event) {
-    // This function was added from the Properties & Events panel. To learn more, visit http://wix.to/UcBnC-4
-    // Add your code for this event here: 
-    const v = validateCheckout();
-}
-
-/**
-*	Adds an event handler that runs when an input element's value
- is changed.
-	[Read more](https://www.wix.com/corvid/reference/$w.ValueMixin.html#onChange)
-*	 @param {$w.Event} event
-*/
-export function txtPhoneNo_change(event) {
-    // This function was added from the Properties & Events panel. To learn more, visit http://wix.to/UcBnC-4
-    // Add your code for this event here: 
-    const v = validateCheckout();
-}
-
-/**
-*	Adds an event handler that runs when an input element's value
- is changed.
-	[Read more](https://www.wix.com/corvid/reference/$w.ValueMixin.html#onChange)
-*	 @param {$w.Event} event
-*/
-export function chkWeight_change(event) {
-    // This function was added from the Properties & Events panel. To learn more, visit http://wix.to/UcBnC-4
-    // Add your code for this event here: 
-    const v = validateCheckout();
-}
-
-/**
-*	Adds an event handler that runs when an input element's value
- is changed.
-	[Read more](https://www.wix.com/corvid/reference/$w.ValueMixin.html#onChange)
-*	 @param {$w.Event} event
-*/
-export function chkWaiver_change(event) {
-    // This function was added from the Properties & Events panel. To learn more, visit http://wix.to/UcBnC-4
-    // Add your code for this event here: 
-    const v = validateCheckout();
-}
-
-/**
-*	Adds an event handler that runs when an input element's value
- is changed.
-	[Read more](https://www.wix.com/corvid/reference/$w.ValueMixin.html#onChange)
-*	 @param {$w.Event} event
-*/
-export function chkMedia_change(event) {
-    // This function was added from the Properties & Events panel. To learn more, visit http://wix.to/UcBnC-4
-
-}
-
-/**
-*	Adds an event handler that runs when an input element's value
- is changed.
-	[Read more](https://www.wix.com/corvid/reference/$w.ValueMixin.html#onChange)
-*	 @param {$w.Event} event
-*/
 
 export function txtMedia_change(event) {
     // This function was added from the Properties & Events panel. To learn more, visit http://wix.to/UcBnC-4
