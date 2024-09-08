@@ -15,13 +15,15 @@ $w.onReady(async function () {
         let email = await getUserEmail(user);
         console.log("USER", user, "EMAIL", email);
 
-        wixData.query("FlightVideos")
+        await wixData.query("FlightVideos")
             .eq("pilotEmail", email)
             .find()
             .then(async (results) => {
                 console.log("Query Results:", results.items);
                 if (results.items.length > 0) {
-                    $w("#listRepeater").data = results.items;
+                    results.items.forEach(item => {
+            $w("#dynamicDataset").setFieldValues(item)
+});
                 } else {
                     console.log("No videos found for this user.");
                 }

@@ -31,7 +31,6 @@ import wixFetch from 'wix-fetch';
 import { members } from "wix-members.v2";
 import { mediaManager } from 'wix-media-backend';
 
-
 export async function checkIfMember(emailAddr){
     const member = await members.queryMembers().eq("loginEmail", emailAddr);
     if(member){

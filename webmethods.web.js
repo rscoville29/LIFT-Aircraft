@@ -21,6 +21,26 @@ $w.onReady(async function () {
 import { Permissions, webMethod } from "wix-web-module";
 import { elevate } from "wix-auth";
 import { members } from "wix-members.v2";
+import { triggeredEmails } from "wix-crm-backend";
+
+export const emailMemberOnVideoUpload = webMethod(Permissions.Anyone, (id, name) => {
+  const emailId = "UMfkkiB";
+  const memberId = id;
+  const options = {
+    variables: {
+      name
+    },
+  };
+
+  return triggeredEmails
+    .emailMember(emailId, memberId, options)
+    .then(() => {
+      console.log("Email was sent to member");
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+});
 
 export const multiply = webMethod(
   Permissions.Anyone, 
@@ -54,6 +74,23 @@ export const myQueryMembersFunction = webMethod(
       console.log("Retrieved members:", siteMembers);
 
       return siteMembers;
+    } catch (error) {
+      console.error(error);
+      // Handle the error
+    }
+  },
+);
+
+export const getCurrentMemberInfo = webMethod(
+  Permissions.Anyone,
+  async () => {
+    try {
+      const member = await members.getCurrentMember();
+      console.log("Retrieved currently logged in member:", member);
+      if(member){
+        return member;
+      }
+      
     } catch (error) {
       console.error(error);
       // Handle the error

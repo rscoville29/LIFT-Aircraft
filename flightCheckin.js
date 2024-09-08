@@ -4,6 +4,9 @@ import { getBookings, getWaivers, getNotes, getBooking, getCompanion, saveCompan
 getContact, getContactByEmail, getSessionOfBooking,} from "backend/backend.jsw"
 import { myCreateMemberFunction, myQueryMembersFunction} from "backend/webmethods.web"
 import { authentication } from "wix-members-frontend";
+import { triggeredEmails } from 'wix-crm';
+//...
+
 
 
 
@@ -12,10 +15,160 @@ let contact = null;
 let pilots = {};
 let location;
 
-export async function sendNewMemberEmail(newMember){
-    await authentication.sendSetPasswordEmail(newMember.loginEmail)
+export async function checkInPilots(pilots){
+    const keys = Object.keys(pilots);
+    for(let key of keys){
+        let pilotEmail = pilots[key].pilotEmail;
+        await wixData.query("PilotReleaseForms").eq("email", pilotEmail).find()
+        .then(async (waiver)=>{
+            const {firstName, lastName, email, emergencyName, emergencyPhone, weight, age, phone} = waiver.items[0];
+            console.log("Retrieved Pilot Waiver", waiver);
+            await wixData.insert("CheckedInPilots", {firstName, lastName, email, emergencyName, emergencyPhone, weight, age, phone})
+            .then((res)=>{console.log("added pilot to checked in collection")}).catch((err)=>{console.log(err)})
+        }).catch((err)=>{console.log(err)});
+        
+    }
+}
+
+export async function waiversLoop(pilots){
+    const keys = Object.keys(pilots);
+    const waiversNeeded = keys.length;
+    let waiversSubmitted = 0;
+    while(waiversSubmitted < waiversNeeded){
+    //looping initially to modify the waivers submitted count, determining if we need to loop
+for (let pilot of Object.values(pilots)){
+            if(pilot.waiver && pilot.needsWaiver){
+                waiversSubmitted++
+                pilot.needsWaiver = false;
+            }
+        }
+
+for (let key of keys) {
+
+    let pilot = pilots[key]; // Access the value associated with the key
+
+    if (!pilot.waiver) {
+        await wixData.query("PilotReleaseForms")
+            .eq("email", pilot.pilotEmail)
+            .find()
+            .then((res) => {
+                if (res && res.totalCount === 1) {
+                    pilots[key].waiver = true;
+                    console.log("PILOT KEY:", key); // Log the key
+                     if (key === 'pilot1') {
+                        $w("#image59").show();
+                    } else if (key === 'pilot2') {
+                        $w("#image60").show();
+                    } else if (key === 'pilot3') {
+                        $w("#image61").show();
+                    } else if (key === 'pilot4') {
+                        $w("#image62").show();
+                    }
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }else{
+        pilots[key].waiver = true;
+             if (key === 'pilot1') {
+                        $w("#image59").show();
+                    } else if (key === 'pilot2') {
+                        $w("#image60").show();
+                    } else if (key === 'pilot3') {
+                        $w("#image61").show();
+                    } else if (key === 'pilot4') {
+                        $w("#image62").show();
+                    }
+
+    }
+}
+//seetting a timeout before looping agin so we don't exceed the call-stack
+      setTimeout(() => {
+          console.log("timing out");
+          return;
+        }, 5000);
+
+    }
+    //once we break out of the loop
+    $w("#image63").hide();
+    $w("#text345").hide();
+    $w("#text346").hide();
+    $w("#checkinButton").show();
+
+}
+
+
+//This sends an email to each newly created member prompting them to add a password
+export async function sendNewMemberEmails(pilots){
+    for (let pilot of Object.values(pilots)) {
+        if(pilot.isNewMember){
+            await authentication.sendSetPasswordEmail(pilot.pilotEmail)
              .then((status)=>{if(status){console.log("Email Sent!")}})
              .catch((err)=>{console.log(err)});
+        }
+    }
+
+}
+
+
+export async function checkFormsAndSendReleaseEmails(pilots){
+    console.log("executing checking forms, pilots:", pilots);
+    for (let pilot of Object.values(pilots)) {
+        //first check for an existing waiver
+        const formInfo = await wixData.query("PilotReleaseForms").eq("email", pilot.pilotEmail).find()
+        .then((results)=>{
+        if(results.totalCount === 1){
+            let createdAtDate = results.items[0]._createdDate;
+            console.log("results:", results);
+            let formId = results.items[0]._id
+            console.log("formid:", formId);
+            //check age of submission
+            let unixCreationDate = Math.floor(new Date(createdAtDate).getTime() / 1000);
+            //seconds in a year:
+            const epochYear = 31536000;
+            let currentEpoch = Math.floor(new Date().getTime() / 1000)
+            if(currentEpoch - unixCreationDate >= epochYear){
+                //the form is expired. Destroy the form and send an email for a new form
+                return { isExpired: true, id: formId}
+            }else{
+                //form is not expired
+                return {isExpired: false}
+            }
+        }else{
+            // no waiver on file for pilot, send email to request waiver
+        triggeredEmails.emailMember('pilotsReleaseForm', pilot.id, {
+        variables: {
+        memberName: pilot.firstName
+  }
+}).then((res)=>{console.log("Waiver email sent to member", res)}).catch((err)=>{console.log(err)});
+        }
+            })
+        .catch((err)=>{console.log(err)});
+
+        if(formInfo){
+            if(formInfo.isExpired){
+            await wixData.remove("PilotReleaseForms", formInfo.id)
+            .then((res)=>{console.log("form deleted", res)})
+            .catch((err)=>{console.log(err)});
+            //send email to request waiver
+        triggeredEmails.emailMember('pilotsReleaseForm', pilot.id, {
+        variables: {
+        memberName: pilot.firstName
+  }
+}).then((res)=>{console.log("Waiver email sent to member", res)}).catch((err)=>{console.log(err)});
+            }else{
+                //pilot has a current waiver
+                pilot.waiver = true;
+            }
+        }
+
+    }
+    $w("#image63").show();
+    $w("#text345").show();
+    $w("#text346").show();
+    $w("#saveNowButton").hide();
+    waiversLoop(pilots);
 }
 
 
@@ -48,13 +201,13 @@ export async function checkAndMakeMembers(pilots) {
          await myCreateMemberFunction(newMemberData).then((newMember)=>{
              console.log("new Member Created:", newMember);
              pilot.id = newMember._id;
-             sendNewMemberEmail(newMember);
+             pilot.isNewMember = true;
              })
          .catch((err)=>{console.log(err)});
             }
         }
         console.log("Pilots after loop:", pilots)
-        return;
+        checkFormsAndSendReleaseEmails(pilots);
     } catch (error) {
         console.error("Error in makeCheckinPilotsMembers:", error);
         throw error;  // Re-throw the error to ensure it's properly logged and handled.
@@ -79,7 +232,15 @@ export async function addPilotsToVideoDataset(pilots) {
 
 
 $w.onReady(function () {
-
+    $w("#text347").hide();
+    $w("#image63").hide();
+    $w("#text345").hide();
+    $w("#text346").hide();
+    $w("#image59").hide();
+    $w("#image60").hide();
+    $w("#image61").hide();
+    $w("#image62").hide();
+    $w("#saveNowButton").hide();
     $w('#dayTable').rows = [];
     $w('#dayTable').columns = [{
             "id": "id",
@@ -159,50 +320,6 @@ $w.onReady(function () {
     ];
 
     setCalendarToDate($w('#datePicker').value);
-    $w("#waiver1").onChange((event)=>{
-        let isChecked = $w("#waiver1").checked;
-        console.log("IS CHECKED?", isChecked);
-        if(isChecked){
-            pilots["pilot1"].waiver = true;
-        }else{
-            pilots["pilot1"].waiver = false;
-        }
-        console.log(pilots);
-        shouldShowCheckinButton();
-    });
-    $w("#waiver2").onChange((event)=>{
-         let isChecked = $w("#waiver2").checked;
-        console.log("IS CHECKED?", isChecked);
-        if(isChecked){
-            pilots["pilot2"].waiver = true;
-        }else{
-            pilots["pilot2"].waiver = false;
-        }
-        console.log(pilots);
-        shouldShowCheckinButton();
-    });
-    $w("#waiver3").onChange((event)=>{
-         let isChecked = $w("#waiver3").checked;
-        console.log("IS CHECKED?", isChecked);
-        if(isChecked){
-            pilots["pilot3"].waiver = true;
-        }else{
-            pilots["pilot3"].waiver = false;
-        }
-        console.log(pilots);
-        shouldShowCheckinButton();
-    });
-    $w("#waiver4").onChange((event)=>{
-         let isChecked = $w("#waiver4").checked;
-        console.log("IS CHECKED?", isChecked);
-        if(isChecked){
-            pilots["pilot4"].waiver = true;
-        }else{
-            pilots["pilot4"].waiver = false;
-        }
-        console.log(pilots);
-        shouldShowCheckinButton();
-    });
 
     $w('#email2').onChange((event)=>{
         let currentEmail = $w("#email2").value;
@@ -213,7 +330,7 @@ $w.onReady(function () {
             pilots["pilot2"].pilotEmail = null;
         }
         console.log(pilots);
-        shouldShowCheckinButton();
+        shouldShowAddPilotsButton();
     });
     $w('#email3').onChange((event)=>{
          let currentEmail = $w("#email3").value;
@@ -224,7 +341,7 @@ $w.onReady(function () {
             pilots["pilot3"].pilotEmail = null;
         }
         console.log(pilots);
-        shouldShowCheckinButton();
+        shouldShowAddPilotsButton();
     });
     $w('#email4').onChange((event)=>{
          let currentEmail = $w("#email4").value;
@@ -235,80 +352,80 @@ $w.onReady(function () {
             pilots["pilot4"].pilotEmail = null;
         }
         console.log(pilots);
-        shouldShowCheckinButton();
+        shouldShowAddPilotsButton();
     });
 
     $w("#firstName1").onChange((event)=>{
         let currentName = $w("#firstName1").value;
             pilots["pilot1"].firstName = currentName;
-            shouldShowCheckinButton();
+            shouldShowAddPilotsButton();
 
     })
 
        $w("#firstName2").onChange((event)=>{
         let currentName = $w("#firstName2").value;
             pilots["pilot2"].firstName = currentName;
-            shouldShowCheckinButton();
+            shouldShowAddPilotsButton();
     })
 
       $w("#firstName3").onChange((event)=>{
         let currentName = $w("#firstName3").value;
             pilots["pilot3"].firstName = currentName;
-            shouldShowCheckinButton();
+            shouldShowAddPilotsButton();
     })
 
           $w("#firstName4").onChange((event)=>{
         let currentName = $w("#firstName4").value;
             pilots["pilot4"].firstName = currentName;
-            shouldShowCheckinButton();
+            shouldShowAddPilotsButton();
     })
 
     $w("#lastName1").onChange((event)=>{
         let currentName = $w("#lastName1").value;
             pilots["pilot1"].lastName = currentName;
-            shouldShowCheckinButton();
+            shouldShowAddPilotsButton();
     })
 
         $w("#lastName2").onChange((event)=>{
         let currentName = $w("#lastName2").value;
             pilots["pilot2"].lastName = currentName;
-            shouldShowCheckinButton();
+            shouldShowAddPilotsButton();
     })
 
         $w("#lastName3").onChange((event)=>{
         let currentName = $w("#lastName3").value;
             pilots["pilot3"].lastName = currentName;
-            shouldShowCheckinButton();
+            shouldShowAddPilotsButton();
     })
 
         $w("#lastName4").onChange((event)=>{
         let currentName = $w("#lastName4").value;
             pilots["pilot4"].lastName = currentName;
-            shouldShowCheckinButton();
+            shouldShowAddPilotsButton();
     })
 
     $w("#weight1").onChange((event)=>{
         let currentWeight = $w('#weight1').value;
         pilots["pilot1"].weight = currentWeight;
-        shouldShowCheckinButton();
+        shouldShowAddPilotsButton();
     });
 
         $w("#weight2").onChange((event)=>{
         let currentWeight = $w('#weight2').value;
         pilots["pilot2"].weight = currentWeight;
-        shouldShowCheckinButton();
+        shouldShowAddPilotsButton();
     });
 
         $w("#weight3").onChange((event)=>{
         let currentWeight = $w('#weight3').value;
         pilots["pilot3"].weight = currentWeight;
-        shouldShowCheckinButton();
+        shouldShowAddPilotsButton();
     });
 
         $w("#weight4").onChange((event)=>{
         let currentWeight = $w('#weight4').value;
         pilots["pilot4"].weight = currentWeight;
-        shouldShowCheckinButton();
+        shouldShowAddPilotsButton();
     });
 
 
@@ -427,20 +544,17 @@ export async function refreshBookingInputTable(book) {
 
     let partySize = book.totalParticipants;
     for(let i = 1; i <= partySize; i++){
-        pilots[`pilot${i}`] = {firstName: null, lastName: null, pilotEmail: null, waiver: false, weight: null}
+        pilots[`pilot${i}`] = {firstName: null, lastName: null, pilotEmail: null, waiver: false, weight: null, needsWaiver: true}
     }
     console.log("PILOTS", pilots);
 
     $w('#group2').collapse();
     $w('#group3').collapse();
     $w('#group4').collapse();
-    $w('#notesText').value = "";
+    
 
     let emails = await getCompanion(book._id);
     let waivers = await getWaivers(book._id);
-    let notes = await getNotes(book._id);
-    
-    if(notes != undefined) $w('#notesText').value = notes;
 
     for (let i = 2; i < 5; i++) {
         $w('#firstName' + i.toString()).value = "";
@@ -474,9 +588,9 @@ export async function refreshBookingInputTable(book) {
             $w('#lastName1').value = contact.info.name.last;
             $w('#gender1').value = (contact.info.extendedFields["custom.gender"] === undefined) ? "undisclosed" : contact.info.extendedFields["custom.gender"];
             $w('#email1').value = contact.primaryInfo.email;
-            $w('#waiver1').checked = (waivers == undefined) ? false : waivers[0];
+            //$w('#waiver1').checked = (waivers == undefined) ? false : waivers[0];
             $w('#weight1').value = (contact.info.extendedFields["custom.lastknownwt"] === undefined) ? "" : contact.info.extendedFields["custom.lastknownwt"];
-            pilots["pilot1"] = {firstName: contact.info.name.first, lastName: contact.info.name.last, pilotEmail: contact.primaryInfo.email, waiver: false, weight: contact.info.extendedFields["custom.lastknownwt"]};
+            pilots["pilot1"] = {firstName: contact.info.name.first, lastName: contact.info.name.last, pilotEmail: contact.primaryInfo.email, waiver: false, weight: contact.info.extendedFields["custom.lastknownwt"], needsWaiver: true};
         });
         console.log("PILOTS:", pilots)
 }
@@ -511,13 +625,17 @@ export function datePicker_change(event) {
 *	 @param {$w.MouseEvent} event
 */
 export async function saveNowButton_click(event) {
+    checkAndMakeMembers(pilots);
+
+    /*
+    Commented this out instead of deleting it in case we do in fact need to save the companion
     let emails = [];
     let firstNames = [];
     let lastNames = [];
     let genders = [];
     let weights = [];
     let waivers = [];
-    let notes = $w('#notesText').value;
+    let notes = '';
 
     for (let i = 1; i < 5; i++) {
         if ($w('#email' + i.toString()).value.length > 0) {
@@ -529,17 +647,7 @@ export async function saveNowButton_click(event) {
             waivers.push($w('#waiver' + i.toString()).checked);
         }
     }
-    //adding the checked in pilots to flight videos for simple association and uploading
-        let pilots = {
-            emails,
-            firstNames,
-            lastNames
-        }
-        //this function will loop through the arrays and create a video template to easily track who needs a video
-        //and upload the video. When they log in later, the videos will automatically filter to their own video.
-        await addPilotsToVideoDataset(pilots);
-
-    saveCompanion(booking._id, 0, notes, firstNames, lastNames, genders, emails, weights, waivers)
+        saveCompanion(booking._id, 0, notes, firstNames, lastNames, genders, emails, weights, waivers)
         .then(result => {
             $w('#resultText').text = result;
             $w('#outcomeSection').expand();
@@ -551,6 +659,7 @@ export async function saveNowButton_click(event) {
             $w('#outcomeSection').hide("fade",fadeOptions);
             console.log(result);
         });
+        */
 
 }
 
@@ -560,8 +669,15 @@ export async function saveNowButton_click(event) {
 *	 @param {$w.MouseEvent} event
 */
 export async function checkinButton_click(event) {
-    console.log("executing ONCLICK")
-    checkAndMakeMembers(pilots);
+        //await sendNewMemberEmails(pilots);
+        //await addPilotsToVideoDataset(pilots);
+        await checkInPilots(pilots);
+        $w("#checkinButton").hide();
+        $w("#text347").show();
+
+        //Create checked in CMS collection and manage check-ins
+
+
     //attempting to make a new member and returning early for testing purposes:
     //makeCheckinPilotsMembers(pilots);
     return;
@@ -571,7 +687,7 @@ export async function checkinButton_click(event) {
     let genders = [];
     let weights = [];
     let waivers = [];
-    let notes = $w('#notesText').value;
+    let notes = '';
 
     for (let i = 1; i < 5; i++) {
         if ($w('#email' + i.toString()).value.length > 0) {
@@ -583,11 +699,6 @@ export async function checkinButton_click(event) {
             waivers.push($w('#waiver' + i.toString()).checked);
         }
     }
-
-        //adding the checked in pilots to flight videos for simple association and uploading
-        //this function will loop through the arrays and create a video template to easily track who needs a video
-        //and upload the video. When they log in later, the videos will automatically filter to their own video.
-        await addPilotsToVideoDataset(pilots);
 
     saveCompanion(booking._id, emails.length, notes, firstNames, lastNames, genders, emails, weights, waivers)
         .then(result => {
@@ -602,7 +713,6 @@ export async function checkinButton_click(event) {
             $w('#outcomeSection').hide("fade",fadeOptions);
 
         });
-        await checkAndMakeMembers(pilots);
 
 }
 
@@ -616,15 +726,17 @@ export function validateEmail(email) {
     }
 }
 
-export function shouldShowCheckinButton(){
+export function shouldShowAddPilotsButton(){
  let allValid = true;
 for (let pilot in pilots) {
         let pilotInfo = pilots[pilot];
         for (let key in pilotInfo) {
-                if (!pilotInfo[key]) { 
+            if(key === "firstName" || key === "lastName" || key === "pilotEmail" || key === "weight"){
+                    if (!pilotInfo[key]) { 
                     allValid = false;
                     break; 
-                }     
+                } 
+            }
         }
         if (!allValid) {
             break; // Exit the outer loop early if a false value is found
@@ -632,8 +744,8 @@ for (let pilot in pilots) {
 }
 console.log("ALL VALID?", allValid);
 if(allValid){
-    $w('#checkinButton').show();
+    $w('#saveNowButton').show();
 }else if(!allValid){
-    $w('#checkinButton').hide();
+    $w('#saveNowButton').hide();
 }
 }
