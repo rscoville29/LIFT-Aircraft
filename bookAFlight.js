@@ -87,11 +87,13 @@ $w.onReady(async function () {
         const availableSlots = availability.slots;
         for (const slot of availableSlots) {
             availableSlotsIn365Days.push(slot);
+            let addrArray = slot.location.businessLocation.address.formatted.split(" ")
+            let city = addrArray[4];
 
             const addr = {
-                label: slot.location.businessLocation.address.city.startsWith("Florence") ? "Austin, TX" : slot.location.businessLocation.address.city + ", " +
+                label: city === 'Florence,' ? "Austin, TX" : city + ", " +
                     slot.location.businessLocation.address.subdivision,
-                value: slot.location.businessLocation.address.city + ", " +
+                value: city + ", " +
                     slot.location.businessLocation.address.subdivision
             };
 
