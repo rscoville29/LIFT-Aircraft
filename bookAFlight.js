@@ -4,7 +4,10 @@ import wixMembers from 'wix-members';
 import wixLocationFrontend from 'wix-location-frontend';
 import wixBookingsFrontend from 'wix-bookings-frontend';
 
-const today = new Date();
+const now = new Date(); // Current date-time in UTC
+const today = new Date(
+    now.toLocaleString("en-US", { timeZone: "America/Chicago" })
+);
 const firstDayOfTodaysMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
 const selectedDateColor = "white";
