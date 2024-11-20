@@ -87,13 +87,17 @@ $w.onReady(async function () {
         const availableSlots = availability.slots;
         for (const slot of availableSlots) {
             availableSlotsIn365Days.push(slot);
-
+            let addrArray = slot.location.businessLocation.address.formatted.split(" ")
+            let city = addrArray[4];
+            let subdivision = addrArray[5];
+            
             const addr = {
-                label: slot.location.businessLocation.address.city.startsWith("Florence") ? "Austin, TX" : slot.location.businessLocation.address.city + ", " +
-                    slot.location.businessLocation.address.subdivision,
-                value: slot.location.businessLocation.address.city + ", " +
-                    slot.location.businessLocation.address.subdivision
+                label: city === 'Florence,' ? "Austin, TX" : city + " " +
+                    subdivision,
+                value: city + " " +
+                    subdivision
             };
+
 
             if (!opts.find((item) => (item.label === addr.label))) {
                 opts.push(addr);
@@ -128,7 +132,7 @@ $w.onReady(async function () {
     }
 
     availableSlotsIn365Days.sort(function (a, b) {
-        return a.startDateTime - b.startDateTime;
+        return a.startDateTime.getTime() - b.startDateTime.getTime();
     });
 
     $w('#locationDropdown').options = opts;
@@ -212,10 +216,16 @@ function refreshCalendar(location, partySize, selectedDate) {
 
     const city = location.toString().split(",")[0].trim();
     const subdivision = location == "ALL" ? "" : location.toString().split(",")[1].trim();
+    
     availableSlotsIn365Days.forEach(slot => {
-        if ((location == "ALL" || (slot.location.businessLocation.address.city == city &&
-                slot.location.businessLocation.address.subdivision == subdivision))) {
+        let addrArray = slot.location.businessLocation.address.formatted.split(" ")
+        let slot_city = addrArray[4];
+        let slot_subdivision = addrArray[5];
+
+        if (location == "ALL" || (slot_city == city.concat(",") &&
+                slot_subdivision == subdivision)) {
             if (slot.remainingSpots >= partySize) {
+                
                 bookableDates.push(slot.startDateTime);
             } else {
                 waitlistedDates.push(slot.startDateTime);
@@ -309,8 +319,12 @@ function refreshSlots(location, numberOfFlights, startDate, endDate) {
     const city = location.toString().split(",")[0].trim();
     const subdivision = location == "ALL" ? "" : location.toString().split(",")[1].trim();
     availableSlotsIn365Days.forEach(slot => {
-        if ((location == "ALL" || (slot.location.businessLocation.address.city == city &&
-                slot.location.businessLocation.address.subdivision == subdivision)) &&
+        let addrArray = slot.location.businessLocation.address.formatted.split(" ")
+        let slot_city = addrArray[4];
+        let slot_subdivision = addrArray[5];
+
+        if ((location == "ALL" || (slot_city == city.concat(",") &&
+                slot_subdivision == subdivision)) &&
             isBetweenDates(slot.startDateTime, startDate, endDate)) {
             selectableSlots.push(slot);
         }

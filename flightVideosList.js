@@ -21,9 +21,7 @@ $w.onReady(async function () {
             .then(async (results) => {
                 console.log("Query Results:", results.items);
                 if (results.items.length > 0) {
-                    results.items.forEach(item => {
-            $w("#dynamicDataset").setFieldValues(item)
-});
+            $w("#listRepeater").data = results.items;
                 } else {
                     console.log("No videos found for this user.");
                 }
