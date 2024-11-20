@@ -73,6 +73,7 @@ $w.onReady(async function () {
 
     const _services = await wixData.query("Bookings/Services").find({ suppressAuth: true })
     services = _services.items;
+    console.log(services)
 
     const options = {
         startDateTime: new Date(),
@@ -130,6 +131,7 @@ $w.onReady(async function () {
         opts.push(addr);
 
     }
+    console.log('OPTS:', opts)
 
     availableSlotsIn365Days.sort(function (a, b) {
         return a.startDateTime.getTime() - b.startDateTime.getTime();
