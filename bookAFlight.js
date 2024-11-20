@@ -4,7 +4,10 @@ import wixMembers from 'wix-members';
 import wixLocationFrontend from 'wix-location-frontend';
 import wixBookingsFrontend from 'wix-bookings-frontend';
 
-const today = new Date();
+const now = new Date(); // Current date-time in UTC
+const today = new Date(
+    now.toLocaleString("en-US", { timeZone: "America/Chicago" })
+);
 const firstDayOfTodaysMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
 const selectedDateColor = "white";
@@ -73,6 +76,7 @@ $w.onReady(async function () {
 
     const _services = await wixData.query("Bookings/Services").find({ suppressAuth: true })
     services = _services.items;
+    console.log(services)
 
     const options = {
         startDateTime: new Date(),
@@ -130,6 +134,7 @@ $w.onReady(async function () {
         opts.push(addr);
 
     }
+    console.log('OPTS:', opts)
 
     availableSlotsIn365Days.sort(function (a, b) {
         return a.startDateTime.getTime() - b.startDateTime.getTime();
