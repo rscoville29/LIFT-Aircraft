@@ -209,7 +209,7 @@ export async function checkAndMakeMembers(pilots) {
         console.log("Pilots after loop:", pilots)
         checkFormsAndSendReleaseEmails(pilots);
     } catch (error) {
-        console.error("Error in makeCheckinPilotsMembers:", error);
+        console.error("Error in Check and make members", error);
         throw error;  // Re-throw the error to ensure it's properly logged and handled.
     }
 }
@@ -669,9 +669,10 @@ export async function saveNowButton_click(event) {
 *	 @param {$w.MouseEvent} event
 */
 export async function checkinButton_click(event) {
-        //await sendNewMemberEmails(pilots);
-        //await addPilotsToVideoDataset(pilots);
-        await checkInPilots(pilots);
+    await checkInPilots(pilots);
+    await sendNewMemberEmails(pilots);
+    await addPilotsToVideoDataset(pilots);
+        
         $w("#checkinButton").hide();
         $w("#text347").show();
 

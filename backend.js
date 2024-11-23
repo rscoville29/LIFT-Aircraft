@@ -175,12 +175,14 @@ export async function updateBookingInLiftOps(bookingId, checkin, firstNames, las
         checkin: checkin,
         startDateTime: session.start.timestamp,
         missionProfile: "Beginner Flight Session",
-        location: booking.bookedEntity.location.businessLocation.name.toUpperCase(),
+        location: "LIFT AUSTIN - HYPERWERX TEST SITE",
+        // NEEDS FIX: TEMPORARY WORKAROUND location: booking.bookedEntity.location.businessLocation.name.toUpperCase(),
         firstNames: firstNames,
         lastNames: lastNames,
         emails: emails,
         weights: weights
     }
+    
 
     booking.formInfo.additionalFields.push
     const fetchOptions = {
@@ -190,7 +192,6 @@ export async function updateBookingInLiftOps(bookingId, checkin, firstNames, las
         },
         body: JSON.stringify(messageBody)
     };
-    return;
     return wixFetch.fetch("https://liftaircraft.j.layershift.co.uk/dispatch/bookingupdate", fetchOptions)
         .then(httpResponse => { return httpResponse });
 
