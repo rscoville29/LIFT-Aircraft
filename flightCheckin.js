@@ -675,12 +675,6 @@ export async function checkinButton_click(event) {
         
         $w("#checkinButton").hide();
         $w("#text347").show();
-
-        //Create checked in CMS collection and manage check-ins
-
-
-    //attempting to make a new member and returning early for testing purposes:
-    //makeCheckinPilotsMembers(pilots);
     return;
     let emails = [];
     let firstNames = [];

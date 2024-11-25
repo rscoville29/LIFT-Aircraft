@@ -401,8 +401,8 @@ export function numberOfFlightsDropdown_change(event) {
 export function repeater_itemReady($item, itemData, index) {
 
     let selectedDateObject = new Date(itemData.startDateTime);
-    let selectedDate = selectedDateObject.toLocaleDateString("en-US", { month: 'long', day: '2-digit', weekday: 'long' })
-    let selectedTime = selectedDateObject.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
+    let selectedDate = selectedDateObject.toLocaleDateString("en-US", { month: 'long', day: '2-digit', weekday: 'long', timeZone: "America/Chicago" })
+    let selectedTime = selectedDateObject.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", timeZone: "America/Chicago" })
 
     const service = services.find(s => s._id === itemData.serviceId);
 
