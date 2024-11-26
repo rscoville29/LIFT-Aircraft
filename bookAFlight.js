@@ -4,11 +4,16 @@ import wixMembers from 'wix-members';
 import wixLocationFrontend from 'wix-location-frontend';
 import wixBookingsFrontend from 'wix-bookings-frontend';
 
-const now = new Date(); // Current date-time in UTC
+const now = new Date(); 
+//time zone defaults to Central time and can change to Japan when that location is selected:
+let timeZone = "America/Chicago";
+let timeAbbrv = "CT";
+
 const today = new Date(
-    now.toLocaleString("en-US", { timeZone: "America/Chicago" })
+    now.toLocaleString("en-US", { timeZone })
 );
-console.log("Today", today)
+
+
 const firstDayOfTodaysMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
 const selectedDateColor = "white";
@@ -77,7 +82,7 @@ $w.onReady(async function () {
 
     const _services = await wixData.query("Bookings/Services").find({ suppressAuth: true })
     services = _services.items;
-    console.log(services)
+    console.log("SERVICES",services)
 
     const options = {
         startDateTime: new Date(),
@@ -152,6 +157,17 @@ $w.onReady(async function () {
     //$w('#boxWaitlist').hide();
     //$w('#txtAvailSessions').html = "<h6 style='text-align:left;'>Available sessions: <br><br><br>  « Select your date</h6>";
     $w('#filterSection').scrollTo();
+
+    //Changing the value of timeZone based on the selected Location in the dropdown:
+    $w('#locationDropdown').onChange(()=>{
+        if($w('#locationDropdown').value === "Florence, TX"){
+            timeZone = "America/Chicago";
+            timeAbbrv = "CT";
+        }else if($w('#locationDropdown').value === "Tokyo, JP"){
+            timeZone = "Asia/Tokyo";
+            timeAbbrv = "JST";
+        }
+    })
 
 });
 
@@ -300,14 +316,24 @@ function refreshCalendar(location, partySize, selectedDate) {
 
 function refreshSlots(location, numberOfFlights, startDate, endDate) {
     selectableSlots = [];
+    //hardcoding a solution to depict Austin, TX when Florence, TX. A more preferred solution would be to update the location of the service itself. 
+    const locationText = (location)=>{
+        if(location === "Florence, TX"){
+            return "Austin, TX"
+        }else{
+            return location;
+        }
+    }
 
     if (location == undefined || numberOfFlights == undefined || startDate == undefined || endDate == undefined) {
         $w('#repeater').data = selectableSlots;
         $w('#slotSection').hide();
         return;
     }
+    console.log("LOCATION", location);
+    
 
-    let loc = location == "ALL" ? "" : "in <strong>" + location + "</strong>";
+    let loc = location == "ALL" ? "" : "in <strong>" + locationText(location) + "</strong>";
     let time;
 
     if (isSameDay(startDate, endDate)) {
@@ -401,14 +427,17 @@ export function numberOfFlightsDropdown_change(event) {
 *	 @param {$w.$w} $item
 */
 export function repeater_itemReady($item, itemData, index) {
+    console.log("Executing repeater item ready", $item, itemData, index)
 
     let selectedDateObject = new Date(itemData.startDateTime);
-    let selectedDate = selectedDateObject.toLocaleDateString("en-US", { month: 'long', day: '2-digit', weekday: 'long', timeZone: "America/Chicago" })
-    let selectedTime = selectedDateObject.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", timeZone: "America/Chicago" })
+
+    //Timezone is very important in selectedDate and selectedTime.
+    let selectedDate = selectedDateObject.toLocaleDateString("en-US", { month: 'long', day: '2-digit', weekday: 'long', timeZone })
+    let selectedTime = selectedDateObject.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", timeZone })
 
     const service = services.find(s => s._id === itemData.serviceId);
 
-    $item('#txtTime').text = selectedTime;
+    $item('#txtTime').text = `${selectedTime} ${timeAbbrv}`;
     $item('#txtService').text = service.serviceName;
     $item('#txtAvail').text = "Available spots: " + itemData.remainingSpots;
     if (itemData.remainingSpots >= Number($w('#numberOfFlightsDropdown').value)) {
