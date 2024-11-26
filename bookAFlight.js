@@ -8,6 +8,7 @@ const now = new Date(); // Current date-time in UTC
 const today = new Date(
     now.toLocaleString("en-US", { timeZone: "America/Chicago" })
 );
+console.log("Today", today)
 const firstDayOfTodaysMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
 const selectedDateColor = "white";
@@ -70,7 +71,7 @@ $w.onReady(async function () {
         value: "ALL"
     };
 
-    opts.push(addr);
+    //opts.push(addr);
 
     member = await getCurrentMember();
 
@@ -143,9 +144,10 @@ $w.onReady(async function () {
     $w('#locationDropdown').options = opts;
     $w('#filterSection').show();
 
-    $w('#locationDropdown').value = "ALL";
+    $w('#locationDropdown').value = "Florence, TX";
+    $w('#locationDropdown').label = "Austin, TX"
     $w('#numberOfFlightsDropdown').value = "1";
-    refreshCalendar("ALL", 1, null);
+    refreshCalendar("Florence, TX", 1, null);
     //$w('#repeater').hide();
     //$w('#boxWaitlist').hide();
     //$w('#txtAvailSessions').html = "<h6 style='text-align:left;'>Available sessions: <br><br><br>  « Select your date</h6>";
