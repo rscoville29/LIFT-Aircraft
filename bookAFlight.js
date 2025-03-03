@@ -150,7 +150,7 @@ $w.onReady(async function () {
     $w('#filterSection').show();
 
     $w('#locationDropdown').value = "Florence, TX";
-    $w('#locationDropdown').label = "Austin, TX"
+    $w('#locationDropdown').label = "Select a location:"
     $w('#numberOfFlightsDropdown').value = "1";
     refreshCalendar("Florence, TX", 1, null);
     //$w('#repeater').hide();
