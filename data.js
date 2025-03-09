@@ -50,9 +50,10 @@ import {emailMemberOnVideoUpload} from './webmethods.web'
     console.error('Error retrieving member ID:', error);
     return null;
   }
- }   
+ }  
 
 export async function generateDocumentFromTemplate(data) {
+    console.log("attempting docupilot deilvery", data)
     const secret = await getSecret('Docupilot_Encoded_API_KEY');
     const url = 'https://api.docupilot.app/documents/create/c7e93cdd/d3b22bc2'; 
     const token = secret;
@@ -83,19 +84,41 @@ export async function generateDocumentFromTemplate(data) {
 }
 
 export async function deletePreviousReleaseForm(email) {
- let results = await wixData.query("PilotReleaseForms").eq("email", email).find();
-	if(results.totalCount > 0){
-		let formId = results.items[0]._id
-		await wixData.remove("PilotReleaseForms", formId).then((res)=>{console.log("deleted old waiver record")})
-		.catch((err)=>{console.log(err)})
-	}
+    console.log("Attempting to delete previous waiver form for", email);
+    try {
+        // Query for the existing form
+        const res = await wixData.query("PilotReleaseForms")
+            .eq("email", email)
+            .find();
+
+        if (res.totalCount > 0) {
+            let formId = res.items[0]._id;
+
+            // Delete the found form
+            const deleteRes = await wixData.remove("PilotReleaseForms", formId);
+            console.log("Deleted old waiver record:", deleteRes);
+        } else {
+            console.log("No previous release form found");
+        }
+    } catch (error) {
+        console.error("Error deleting previous waiver form:", error);
+    }
 }
 
+
+/*
+commenting out the beforeInsert because there is an issue on Wix's backend. Their Hooks are not executing properly.
+Will report issue to Wix. Date: 03/09/2025
+
 export function PilotReleaseForms_beforeInsert(item, context) {
+    console.log("Before Insert", item)
     const {email} = item;
     deletePreviousReleaseForm(email)
  
 }
+*/
+
+
 
 export async function PilotReleaseForms_afterInsert(item, context) {
   console.log("After Insert:", item, context)
@@ -122,14 +145,13 @@ export async function PilotReleaseForms_afterInsert(item, context) {
 	  }
 
 	  console.log("DATA:", JSON.stringify(data));
-
       generateDocumentFromTemplate(data);
 
 
 }
 
 export async function FlightVideos_afterUpdate(item, context) {
-    console.log("Flight Video collection updated:", item)
+    console.log("Flight Video collection updated!", item)
     if(item.video){
         console.log("Video Exists")
         console.log("item email:", item.pilotEmail)
