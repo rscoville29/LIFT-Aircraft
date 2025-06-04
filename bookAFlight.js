@@ -62,18 +62,18 @@ $w.onReady(async function () {
     $w('#yearMonth').options = yearMonthValues;
 
     let opts = [];
-    // const addr = {
-    //     label: "All bookable locations",
-    //     value: "ALL"
-    // };
-    // //opts.push(addr);
+    const addr = {
+        label: "All bookable locations",
+        value: "ALL"
+    };
+    //opts.push(addr);
 
-    // //hardcoding Austin as an option so it always appears, even when no availabilty exists
-    // const austin = {
-    //     label: "Austin, TX",
-    //     value: "Florence, TX"
-    // }
-    // opts.push(austin);
+    //hardcoding Austin as an option so it always appears, even when no availabilty exists
+    const austin = {
+        label: "Austin, TX - The Long Center",
+        value: "Austin, TX"
+    }
+    opts.push(austin);
 
     
 
@@ -81,7 +81,6 @@ $w.onReady(async function () {
 
     const _services = await wixData.query("Bookings/Services").find({ suppressAuth: true })
     services = _services.items;
-
     console.log("SERVICES",services)
 
     const options = {
@@ -91,19 +90,22 @@ $w.onReady(async function () {
 
     for (const service of services) {
 
-        console.log('Service', service)
         let serviceID = service._id;
         const availability = await wixBookings.getServiceAvailability(serviceID, options);
         console.log("AVAILABILITY:", availability)
         const availableSlots = availability.slots;
         for (const slot of availableSlots) {
             availableSlotsIn365Days.push(slot);
-            let addrName = slot.location.businessLocation.name;
-            let slotId = slot.serviceId;
+            let addrArray = slot.location.businessLocation.address.formatted.split(" ")
+            console.log(addrArray);
+            let city = addrArray[4];
+            let subdivision = addrArray[5];
             
             const addr = {
-                label: addrName,
-                value: slotId
+                label: city === 'Austin,' ? "Austin, TX - The Long Center" : city + " " +
+                    subdivision,
+                value: city + " " +
+                    subdivision
             };
 
 
@@ -147,9 +149,10 @@ $w.onReady(async function () {
     $w('#locationDropdown').options = opts;
     $w('#filterSection').show();
 
-    //$w('#locationDropdown').value = "Florence, TX";
+    $w('#locationDropdown').value = "Florence, TX";
+    $w('#locationDropdown').label = "Select a location:"
     $w('#numberOfFlightsDropdown').value = "1";
-    refreshCalendar({label: "LIFT Austin - HyperWerx Test Site", value: "71284967-d9b1-4738-8492-01fb0cb0a99e"}, 1, null);
+    refreshCalendar("Florence, TX", 1, null);
     //$w('#repeater').hide();
     //$w('#boxWaitlist').hide();
     //$w('#txtAvailSessions').html = "<h6 style='text-align:left;'>Available sessions: <br><br><br>  « Select your date</h6>";
@@ -218,37 +221,28 @@ function indexOfObject(obj, list) {
 }
 
 function refreshCalendar(location, partySize, selectedDate) {
-    console.log("Location in refreshCalendar", location);
+
     // Collect list of bookable dates at filtered location in a year
     let bookableDates = [];
     let waitlistedDates = [];
 
-    // const city = location.toString().split(",")[0].trim();
-    // const subdivision = location == "ALL" ? "" : location.toString().split(",")[1].trim();
+    const city = location.toString().split(",")[0].trim();
+    const subdivision = location == "ALL" ? "" : location.toString().split(",")[1].trim();
     
     availableSlotsIn365Days.forEach(slot => {
+        let addrArray = slot.location.businessLocation.address.formatted.split(" ")
+        let slot_city = addrArray[4];
+        let slot_subdivision = addrArray[5];
 
-        let addrName = slot.location.businessLocation.name;
-        // let addrArray = slot.location.businessLocation.address.formatted.split(" ")
-        // let slot_city = addrArray[4];
-        // let slot_subdivision = addrArray[5];
-
-        // if (location == "ALL" || (slot_city == city.concat(",") &&
-        //         slot_subdivision == subdivision)) {
-        //     if (slot.remainingSpots >= partySize) {
+        if (location == "ALL" || (slot_city == city.concat(",") &&
+                slot_subdivision == subdivision)) {
+            if (slot.remainingSpots >= partySize) {
                 
-        //         bookableDates.push(slot.startDateTime);
-        //     } else {
-        //         waitlistedDates.push(slot.startDateTime);
-        //     }
-        // }
-        if (slot.remainingSpots >= partySize) {
-                
-            bookableDates.push(slot.startDateTime);
-        } else {
-            waitlistedDates.push(slot.startDateTime);
+                bookableDates.push(slot.startDateTime);
+            } else {
+                waitlistedDates.push(slot.startDateTime);
+            }
         }
-        
     });
 
     bookableDates.sort(function (a, b) {
@@ -310,17 +304,16 @@ function refreshCalendar(location, partySize, selectedDate) {
 }
 
 function refreshSlots(location, numberOfFlights, startDate, endDate) {
-    console.log("location in refreshSlots", location);
     selectableSlots = [];
     //hardcoding a solution to depict Austin, TX when Florence, TX. A more preferred solution would be to update the location of the service itself. 
-    // const locationText = (location)=>{
-    //     if(location === "Florence, TX"){
-    //         return "Austin, TX"
-    //     }else{
-    //         return location;
-    //     }
-    // }
-        //is the following necessary?
+    const locationText = (location)=>{
+        if(location === "Florence, TX"){
+            return "Austin, TX"
+        }else{
+            return location;
+        }
+    }
+
     if (location == undefined || numberOfFlights == undefined || startDate == undefined || endDate == undefined) {
         $w('#repeater').data = selectableSlots;
         $w('#slotSection').hide();
@@ -329,7 +322,7 @@ function refreshSlots(location, numberOfFlights, startDate, endDate) {
     console.log("LOCATION", location);
     
 
-    let locationText = "in <strong>" + location.label + "</strong>";
+    let loc = location == "ALL" ? "" : "in <strong>" + locationText(location) + "</strong>";
     let time;
 
     if (isSameDay(startDate, endDate)) {
@@ -345,19 +338,21 @@ function refreshSlots(location, numberOfFlights, startDate, endDate) {
         time = "between <strong>" + selectedSDate + "</strong> and <strong>" + selectedEDate + "</strong>";
     }
 
-    // const city = location.toString().split(",")[0].trim();
-    // const subdivision = location == "ALL" ? "" : location.toString().split(",")[1].trim();
+    const city = location.toString().split(",")[0].trim();
+    const subdivision = location == "ALL" ? "" : location.toString().split(",")[1].trim();
     availableSlotsIn365Days.forEach(slot => {
-        // let addrArray = slot.location.businessLocation.address.formatted.split(" ")
-        // let slot_city = addrArray[4];
-        // let slot_subdivision = addrArray[5];
+        let addrArray = slot.location.businessLocation.address.formatted.split(" ")
+        let slot_city = addrArray[4];
+        let slot_subdivision = addrArray[5];
 
-        if (isBetweenDates(slot.startDateTime, startDate, endDate)) {
+        if ((location == "ALL" || (slot_city == city.concat(",") &&
+                slot_subdivision == subdivision)) &&
+            isBetweenDates(slot.startDateTime, startDate, endDate)) {
             selectableSlots.push(slot);
         }
     });
 
-    $w('#txtAvailSessions').html = "<h6 style='text-align:left;'>Select your time " + locationText + " " + time + " for <strong>" + numberOfFlights.toString() + " flight(s)</strong>!</h6>";
+    $w('#txtAvailSessions').html = "<h6 style='text-align:left;'>Select your time " + loc + " " + time + " for <strong>" + numberOfFlights.toString() + " flight(s)</strong>!</h6>";
 
     if (selectableSlots == null || selectableSlots.length == 0) {
         $w('#boxWaitlist').show();
