@@ -3,7 +3,11 @@ import wixData from 'wix-data';
 import wixMembers from 'wix-members';
 import wixLocationFrontend from 'wix-location-frontend';
 import wixBookingsFrontend from 'wix-bookings-frontend';
+import wixWindowFrontend from "wix-window-frontend";
 
+
+
+let deviceType = wixWindowFrontend.formFactor;
 const today = new Date();
 const firstDayOfTodaysMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
@@ -46,6 +50,7 @@ let USDollar = new Intl.NumberFormat('en-US', {
     currency: 'USD',
 });
 
+
 $w.onReady(async function () {
 
     let yearMonthValues = [];
@@ -77,6 +82,7 @@ $w.onReady(async function () {
             label: "--- Active Locations ---",
             value: "__"
         };
+
     opts.push(activeLocationsLabel,austin);
 
     
@@ -104,6 +110,7 @@ $w.onReady(async function () {
             console.log(addrArray);
             let city = addrArray[4];
             let subdivision = addrArray[5];
+            console.log("City and Sub", city, subdivision);
             
             const addr = {
                 label: city === 'Austin,' ? "Austin, TX - The Long Center" : city + " " +
@@ -160,7 +167,7 @@ $w.onReady(async function () {
     //$w('#repeater').hide();
     //$w('#boxWaitlist').hide();
     //$w('#txtAvailSessions').html = "<h6 style='text-align:left;'>Available sessions: <br><br><br>  « Select your date</h6>";
-    $w('#filterSection').scrollTo();
+    //$w('#filterSection').scrollTo();
 
 });
 
@@ -225,7 +232,7 @@ function indexOfObject(obj, list) {
 }
 
 function refreshCalendar(location, partySize, selectedDate) {
-
+    console.log("Refreshing calendar", location, partySize, selectedDate);
     // Collect list of bookable dates at filtered location in a year
     let bookableDates = [];
     let waitlistedDates = [];
@@ -308,6 +315,7 @@ function refreshCalendar(location, partySize, selectedDate) {
 }
 
 function refreshSlots(location, numberOfFlights, startDate, endDate) {
+    console.log("refreshing slots", location, numberOfFlights, startDate, endDate);
     selectableSlots = [];
     //hardcoding a solution to depict Austin, TX when Florence, TX. A more preferred solution would be to update the location of the service itself. 
     const locationText = (location)=>{
@@ -370,6 +378,9 @@ function refreshSlots(location, numberOfFlights, startDate, endDate) {
     $w('#repeater').data = [];
     $w('#repeater').data = selectableSlots;
     $w('#slotSection').show();
+    if(deviceType === "Mobile" && selectableSlots.length > 0){
+        $w('#repeater').scrollTo();
+    }
 
 }
 
@@ -459,7 +470,7 @@ export function repeater_itemReady($item, itemData, index) {
             totalPrice = recalcPrice(selectedService);
             $w('#selectedSlotSection').show();
             $w('#selectedSlotSection').expand();
-            $w('#selectedSlotSection').scrollTo();
+            //$w('#selectedSlotSection').scrollTo();
             $w('#bookingWizard').changeState("checkout");
 
         });
@@ -479,7 +490,7 @@ export function repeater_itemReady($item, itemData, index) {
 
             $w('#selectedSlotSection').show();
             $w('#selectedSlotSection').expand();
-            $w('#selectedSlotSection').scrollTo();
+            //$w('#selectedSlotSection').scrollTo();
             $w('#bookingWizard').changeState("serviceWaitlist");
 
         });
