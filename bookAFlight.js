@@ -125,7 +125,7 @@ $w.onReady(async function () {
 
     if (results.length > 0) {
         const addr = {
-            label: "--- FUTURE LOCATIONS ---",
+            label: "--- Join Waitlist ---",
             value: "__F"
         };
         opts.push(addr);
@@ -149,10 +149,10 @@ $w.onReady(async function () {
     $w('#locationDropdown').options = opts;
     $w('#filterSection').show();
 
-    $w('#locationDropdown').value = "Florence, TX";
+    $w('#locationDropdown').value = "Austin, TX";
     $w('#locationDropdown').label = "Select a location:"
     $w('#numberOfFlightsDropdown').value = "1";
-    refreshCalendar("Florence, TX", 1, null);
+    refreshCalendar("Austin, TX", 1, null);
     //$w('#repeater').hide();
     //$w('#boxWaitlist').hide();
     //$w('#txtAvailSessions').html = "<h6 style='text-align:left;'>Available sessions: <br><br><br>  « Select your date</h6>";
