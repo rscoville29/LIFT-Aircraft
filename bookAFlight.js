@@ -4,16 +4,7 @@ import wixMembers from 'wix-members';
 import wixLocationFrontend from 'wix-location-frontend';
 import wixBookingsFrontend from 'wix-bookings-frontend';
 
-const now = new Date(); 
-//time zone defaults to Central time and can change to Japan when that location is selected:
-let timeZone = "America/Chicago";
-let timeAbbrv = "CT";
-
-const today = new Date(
-    now.toLocaleString("en-US", { timeZone })
-);
-
-
+const today = new Date();
 const firstDayOfTodaysMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
 const selectedDateColor = "white";
@@ -75,8 +66,20 @@ $w.onReady(async function () {
         label: "All bookable locations",
         value: "ALL"
     };
-
     //opts.push(addr);
+
+    //hardcoding Austin as an option so it always appears, even when no availabilty exists
+    const austin = {
+        label: "Austin, TX - The Long Center",
+        value: "Austin, TX"
+    }
+    const activeLocationsLabel = {
+            label: "--- Active Locations ---",
+            value: "__"
+        };
+    opts.push(activeLocationsLabel,austin);
+
+    
 
     member = await getCurrentMember();
 
@@ -98,11 +101,12 @@ $w.onReady(async function () {
         for (const slot of availableSlots) {
             availableSlotsIn365Days.push(slot);
             let addrArray = slot.location.businessLocation.address.formatted.split(" ")
+            console.log(addrArray);
             let city = addrArray[4];
             let subdivision = addrArray[5];
             
             const addr = {
-                label: city === 'Florence,' ? "Austin, TX" : city + " " +
+                label: city === 'Austin,' ? "Austin, TX - The Long Center" : city + " " +
                     subdivision,
                 value: city + " " +
                     subdivision
@@ -125,7 +129,7 @@ $w.onReady(async function () {
 
     if (results.length > 0) {
         const addr = {
-            label: "--- FUTURE LOCATIONS ---",
+            label: "--- Join Waitlist ---",
             value: "__F"
         };
         opts.push(addr);
@@ -149,25 +153,14 @@ $w.onReady(async function () {
     $w('#locationDropdown').options = opts;
     $w('#filterSection').show();
 
-    $w('#locationDropdown').value = "Florence, TX";
+    $w('#locationDropdown').value = "Austin, TX";
     $w('#locationDropdown').label = "Select a location:"
     $w('#numberOfFlightsDropdown').value = "1";
-    refreshCalendar("Florence, TX", 1, null);
+    refreshCalendar("Austin, TX", 1, null);
     //$w('#repeater').hide();
     //$w('#boxWaitlist').hide();
     //$w('#txtAvailSessions').html = "<h6 style='text-align:left;'>Available sessions: <br><br><br>  « Select your date</h6>";
     $w('#filterSection').scrollTo();
-
-    //Changing the value of timeZone based on the selected Location in the dropdown:
-    $w('#locationDropdown').onChange(()=>{
-        if($w('#locationDropdown').value === "Florence, TX"){
-            timeZone = "America/Chicago";
-            timeAbbrv = "CT";
-        }else if($w('#locationDropdown').value === "Tokyo, JP"){
-            timeZone = "Asia/Tokyo";
-            timeAbbrv = "JST";
-        }
-    })
 
 });
 
@@ -427,17 +420,14 @@ export function numberOfFlightsDropdown_change(event) {
 *	 @param {$w.$w} $item
 */
 export function repeater_itemReady($item, itemData, index) {
-    console.log("Executing repeater item ready", $item, itemData, index)
 
     let selectedDateObject = new Date(itemData.startDateTime);
-
-    //Timezone is very important in selectedDate and selectedTime.
-    let selectedDate = selectedDateObject.toLocaleDateString("en-US", { month: 'long', day: '2-digit', weekday: 'long', timeZone })
-    let selectedTime = selectedDateObject.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", timeZone })
+    let selectedDate = selectedDateObject.toLocaleDateString("en-US", { month: 'long', day: '2-digit', weekday: 'long' })
+    let selectedTime = selectedDateObject.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
 
     const service = services.find(s => s._id === itemData.serviceId);
 
-    $item('#txtTime').text = `${selectedTime} ${timeAbbrv}`;
+    $item('#txtTime').text = selectedTime;
     $item('#txtService').text = service.serviceName;
     $item('#txtAvail').text = "Available spots: " + itemData.remainingSpots;
     if (itemData.remainingSpots >= Number($w('#numberOfFlightsDropdown').value)) {
