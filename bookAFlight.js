@@ -73,7 +73,11 @@ $w.onReady(async function () {
         label: "Austin, TX - The Long Center",
         value: "Austin, TX"
     }
-    opts.push(austin);
+    const activeLocationsLabel = {
+            label: "--- Active Locations ---",
+            value: "__"
+        };
+    opts.push(activeLocationsLabel,austin);
 
     
 
