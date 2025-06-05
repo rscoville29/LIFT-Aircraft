@@ -10,6 +10,7 @@ import wixWindowFrontend from "wix-window-frontend";
 let deviceType = wixWindowFrontend.formFactor;
 const today = new Date();
 const firstDayOfTodaysMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+let initialVisit = true;
 
 const selectedDateColor = "white";
 const selectedDateBgColor = "#ffb71bff";
@@ -261,7 +262,7 @@ function refreshCalendar(location, partySize, selectedDate) {
     });
 
     if (selectedDate == null) {
-        selectedDate = bookableDates.length == 0 ? today : bookableDates[0];
+        selectedDate = today;
     }
 
     let firstDay = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
@@ -378,7 +379,10 @@ function refreshSlots(location, numberOfFlights, startDate, endDate) {
     $w('#repeater').data = [];
     $w('#repeater').data = selectableSlots;
     $w('#slotSection').show();
-    if(deviceType === "Mobile" && selectableSlots.length > 0){
+    if(initialVisit){
+        initialVisit = false;
+    }
+    if(deviceType === "Mobile" && selectableSlots.length > 0 && !initialVisit){
         $w('#repeater').scrollTo();
     }
 
