@@ -381,7 +381,7 @@ function refreshSlots(location, numberOfFlights, startDate, endDate) {
     $w('#slotSection').show();
     
     if(deviceType === "Mobile" && selectableSlots.length > 0 && !initialVisit){
-        $w('#repeater').scrollTo();
+        $w('#txtAvailSessions').scrollTo();
     }
     if(initialVisit){
         initialVisit = false;
