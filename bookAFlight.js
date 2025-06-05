@@ -53,7 +53,8 @@ let USDollar = new Intl.NumberFormat('en-US', {
 
 
 $w.onReady(async function () {
-
+    //hiding yearMonth element to use the text element instead to solve the problem of the dropdown arrow
+    $w('#yearMonth').hide();
     let yearMonthValues = [];
 
     for (let i = -12; i <= 12; i++) {
@@ -269,9 +270,30 @@ function refreshCalendar(location, partySize, selectedDate) {
     let sDate = new Date(getSunday(firstDay));
 
     const firstDayOfMonthOfSelectedDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-    $w('#yearMonth').value = firstDayOfMonthOfSelectedDate.getFullYear().toString() + "-" +
+    let yearmonthValue = firstDayOfMonthOfSelectedDate.getFullYear().toString() + "-" +
         Number(firstDayOfMonthOfSelectedDate.getMonth() + 1).toString() + "-" +
         firstDayOfMonthOfSelectedDate.getDate().toString();
+        $w('#yearMonth').value = yearmonthValue;
+        let [year, month] = yearmonthValue.split("-");
+        let monthValue = Number(month);
+        const months = {
+            1: "January",
+            2: "February",
+            3: "March", 
+            4: "April",
+            5: "May",
+            6: "June",
+            7: "July",
+            8: "August",
+            9: "September",
+            10: "October",
+            11: "November",
+            12: "December"
+        };
+        let formattedYearMonth = `${months[monthValue]} ${year}`
+        //testing text instead of dropdown for yearMonth value:
+        $w('#text360').text = formattedYearMonth;
+        
     calButtonDates = [];
 
     calDayButtons.forEach((item, index) => {
@@ -381,7 +403,7 @@ function refreshSlots(location, numberOfFlights, startDate, endDate) {
     $w('#slotSection').show();
     
     if(deviceType === "Mobile" && selectableSlots.length > 0 && !initialVisit){
-        $w('#repeater').scrollTo();
+        $w('#txtAvailSessions').scrollTo();
     }
     if(initialVisit){
         initialVisit = false;
