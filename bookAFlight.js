@@ -379,13 +379,13 @@ function refreshSlots(location, numberOfFlights, startDate, endDate) {
     $w('#repeater').data = [];
     $w('#repeater').data = selectableSlots;
     $w('#slotSection').show();
-    if(initialVisit){
-        initialVisit = false;
-    }
+    
     if(deviceType === "Mobile" && selectableSlots.length > 0 && !initialVisit){
         $w('#repeater').scrollTo();
     }
-
+    if(initialVisit){
+        initialVisit = false;
+    }
 }
 
 /**
