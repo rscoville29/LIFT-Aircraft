@@ -261,7 +261,7 @@ function refreshCalendar(location, partySize, selectedDate) {
         return a - b;
     });
 
-    if (selectedDate == null) {
+    if (selectedDate == null && initialVisit) {
         selectedDate = today;
     }
 
