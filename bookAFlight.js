@@ -386,8 +386,15 @@ function refreshSlots(location, numberOfFlights, startDate, endDate) {
             selectableSlots.push(slot);
         }
     });
-
+    if(selectableSlots.length > 0){
+    $w('#txtAvailSessions').show();
     $w('#txtAvailSessions').html = "<h6 style='text-align:left;'>Select your time " + loc + " " + time + " for <strong>" + numberOfFlights.toString() + " flight(s)</strong>!</h6>";
+    $w('#text302').hide();
+    }else if(selectableSlots.length === 0){
+        $w('#txtAvailSessions').hide();
+        $w('#text302').show();
+    }
+    
 
     if (selectableSlots == null || selectableSlots.length == 0) {
         $w('#boxWaitlist').show();
@@ -403,7 +410,7 @@ function refreshSlots(location, numberOfFlights, startDate, endDate) {
     $w('#slotSection').show();
     
     if(deviceType === "Mobile" && selectableSlots.length > 0 && !initialVisit){
-        $w('#txtAvailSessions').scrollTo();
+        $w('#mobileBox1').scrollTo();
     }
     if(initialVisit){
         initialVisit = false;
@@ -650,12 +657,12 @@ export function btnCheckout_click(event) {
             console.log(options);
             if (result.status === "Confirmed") {
                 $w('#bookingWizard').changeState("thankyou");
-                $w('#bookingWizard').scrollTo();
+                //$w('#bookingWizard').scrollTo();
 
             } else {
                 $w('#txtError').text = `Error message: ${result.status} Booking ID: ${result.bookingId}`;
                 $w('#bookingWizard').changeState("error");
-                $w('#bookingWizard').scrollTo();
+                //$w('#bookingWizard').scrollTo();
             }
 
         }).catch((err)=>{
@@ -903,3 +910,7 @@ export function yearMonth_change(event) {
     refreshCalendar($w('#locationDropdown').value, $w('#numberOfFlightsDropdown').value, selectedDate);
 
 }
+
+$w("#bookingWizard").onChange((event) => {
+  wixWindowFrontend.scrollTo(1, 1);
+});
