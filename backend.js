@@ -103,7 +103,7 @@ export function getBooking(bookingId) {
 }
 
 export function getContact(contactId) {
-    return wixCrmBackend.contacts.getContact(contactId)
+    return wixCrmBackend.getContactById(contactId)
         .then(queryResult => {
             return queryResult;
         });
