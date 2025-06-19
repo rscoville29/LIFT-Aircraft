@@ -63,6 +63,10 @@ for (let key of keys) {
                         $w("#image61").show();
                     } else if (key === 'pilot4') {
                         $w("#image62").show();
+                    }else if (key === 'pilot5') {
+                        $w("#image64").show();
+                    }else if (key === 'pilot6') {
+                        $w("#image65").show();
                     }
                 }
             })
@@ -79,6 +83,10 @@ for (let key of keys) {
                         $w("#image61").show();
                     } else if (key === 'pilot4') {
                         $w("#image62").show();
+                    }else if (key === 'pilot5') {
+                        $w("#image64").show();
+                    }else if (key === 'pilot6') {
+                        $w("#image65").show();
                     }
 
     }
@@ -240,6 +248,8 @@ $w.onReady(function () {
     $w("#image60").hide();
     $w("#image61").hide();
     $w("#image62").hide();
+    $w("#image64").hide();
+    $w("#image65").hide();
     $w("#saveNowButton").hide();
     $w('#dayTable').rows = [];
     $w('#dayTable').columns = [{
@@ -354,6 +364,28 @@ $w.onReady(function () {
         console.log(pilots);
         shouldShowAddPilotsButton();
     });
+    $w('#email5').onChange((event)=>{
+         let currentEmail = $w("#email5").value;
+         console.log("CURRENT EMAIL:", currentEmail);
+        if(validateEmail(currentEmail)){
+            pilots["pilot5"].pilotEmail = currentEmail;
+        }else{
+            pilots["pilot5"].pilotEmail = null;
+        }
+        console.log(pilots);
+        shouldShowAddPilotsButton();
+    });
+    $w('#email6').onChange((event)=>{
+         let currentEmail = $w("#email6").value;
+         console.log("CURRENT EMAIL:", currentEmail);
+        if(validateEmail(currentEmail)){
+            pilots["pilot6"].pilotEmail = currentEmail;
+        }else{
+            pilots["pilot6"].pilotEmail = null;
+        }
+        console.log(pilots);
+        shouldShowAddPilotsButton();
+    });
 
     $w("#firstName1").onChange((event)=>{
         let currentName = $w("#firstName1").value;
@@ -377,6 +409,16 @@ $w.onReady(function () {
           $w("#firstName4").onChange((event)=>{
         let currentName = $w("#firstName4").value;
             pilots["pilot4"].firstName = currentName;
+            shouldShowAddPilotsButton();
+    })
+    $w("#firstName5").onChange((event)=>{
+        let currentName = $w("#firstName5").value;
+            pilots["pilot5"].firstName = currentName;
+            shouldShowAddPilotsButton();
+    })
+    $w("#firstName6").onChange((event)=>{
+        let currentName = $w("#firstName6").value;
+            pilots["pilot6"].firstName = currentName;
             shouldShowAddPilotsButton();
     })
 
@@ -403,6 +445,16 @@ $w.onReady(function () {
             pilots["pilot4"].lastName = currentName;
             shouldShowAddPilotsButton();
     })
+    $w("#lastName5").onChange((event)=>{
+        let currentName = $w("#lastName5").value;
+            pilots["pilot5"].lastName = currentName;
+            shouldShowAddPilotsButton();
+    })
+    $w("#lastName6").onChange((event)=>{
+        let currentName = $w("#lastName6").value;
+            pilots["pilot6"].lastName = currentName;
+            shouldShowAddPilotsButton();
+    })
 
     $w("#weight1").onChange((event)=>{
         let currentWeight = $w('#weight1').value;
@@ -425,6 +477,16 @@ $w.onReady(function () {
         $w("#weight4").onChange((event)=>{
         let currentWeight = $w('#weight4').value;
         pilots["pilot4"].weight = currentWeight;
+        shouldShowAddPilotsButton();
+    });
+     $w("#weight5").onChange((event)=>{
+        let currentWeight = $w('#weight5').value;
+        pilots["pilot5"].weight = currentWeight;
+        shouldShowAddPilotsButton();
+    });
+     $w("#weight6").onChange((event)=>{
+        let currentWeight = $w('#weight6').value;
+        pilots["pilot6"].weight = currentWeight;
         shouldShowAddPilotsButton();
     });
 
@@ -550,12 +612,14 @@ console.log("running refreshBooking Input table")
     $w('#group2').collapse();
     $w('#group3').collapse();
     $w('#group4').collapse();
+    $w('#group5').collapse();
+    $w('#group6').collapse();
     
 
     let emails = await getCompanion(book._id);
     let waivers = await getWaivers(book._id);
 
-    for (let i = 2; i < 5; i++) {
+    for (let i = 2; i < 7; i++) {
         $w('#firstName' + i.toString()).value = "";
         $w('#lastName' + i.toString()).value = "";
         $w('#gender' + i.toString()).value = "undisclosed";
