@@ -450,7 +450,6 @@ export function setCalendarToDate(date) {
             result._items.forEach(element => {
                 let ssn = getSessionOfBooking(element._id)
                     .then(function (session) {
-
                         let time = new Date(session.start.timestamp).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
                         let firstName = element.formInfo.contactDetails.firstName;
                         let lastName = element.formInfo.contactDetails.lastName;
@@ -541,7 +540,7 @@ export function dayTable_rowSelect(event) {
 }
 
 export async function refreshBookingInputTable(book) {
-
+console.log("running refreshBooking Input table")
     let partySize = book.totalParticipants;
     for(let i = 1; i <= partySize; i++){
         pilots[`pilot${i}`] = {firstName: null, lastName: null, pilotEmail: null, waiver: false, weight: null, needsWaiver: true}
@@ -567,12 +566,13 @@ export async function refreshBookingInputTable(book) {
             $w('#group' + i.toString()).expand();
             if (emails !== undefined && emails.length > i - 1) {
                 getContactByEmail(emails[i - 1]).then(result => {
-                    $w('#firstName' + i.toString()).value = result.info.name.first;
-                    $w('#lastName' + i.toString()).value = result.info.name.last;
-                    $w('#gender' + i.toString()).value = (result.info.extendedFields["custom.gender"] === undefined) ? "undisclosed" : result.info.extendedFields["custom.gender"];
+                    console.log("result line 569", result);
+                    $w('#firstName' + i.toString()).value = result.firstName;
+                    $w('#lastName' + i.toString()).value = result.lastName;
+                    //$w('#gender' + i.toString()).value = (result.info.extendedFields["custom.gender"] === undefined) ? "undisclosed" : result.info.extendedFields["custom.gender"];
                     $w('#waiver' + i.toString()).checked = (waivers == undefined) ? false : waivers[i - 1];
-                    $w('#email' + i.toString()).value = result.primaryInfo.email;
-                    $w('#weight' + i.toString()).value = (result.info.extendedFields["custom.lastknownwt"] === undefined) ? "" : result.info.extendedFields["custom.lastknownwt"];
+                    $w('#email' + i.toString()).value = result.emails[0];
+                    //$w('#weight' + i.toString()).value = (result.info.extendedFields["custom.lastknownwt"] === undefined) ? "" : result.info.extendedFields["custom.lastknownwt"];
                     
                 });
             }
@@ -583,14 +583,17 @@ export async function refreshBookingInputTable(book) {
 
     getContact(book.formInfo.contactDetails.contactId)
         .then(result => {
+            console.log("result line 586", result);
             contact = result;
-            $w('#firstName1').value = contact.info.name.first;
-            $w('#lastName1').value = contact.info.name.last;
-            $w('#gender1').value = (contact.info.extendedFields["custom.gender"] === undefined) ? "undisclosed" : contact.info.extendedFields["custom.gender"];
-            $w('#email1').value = contact.primaryInfo.email;
+            $w('#firstName1').value = contact.firstName;
+            $w('#lastName1').value = contact.lastName;
+            //$w('#gender1').value = (contact.info.extendedFields["custom.gender"] === undefined) ? "undisclosed" : contact.info.extendedFields["custom.gender"];
+            $w('#email1').value = contact.emails[0];
             //$w('#waiver1').checked = (waivers == undefined) ? false : waivers[0];
-            $w('#weight1').value = (contact.info.extendedFields["custom.lastknownwt"] === undefined) ? "" : contact.info.extendedFields["custom.lastknownwt"];
-            pilots["pilot1"] = {firstName: contact.info.name.first, lastName: contact.info.name.last, pilotEmail: contact.primaryInfo.email, waiver: false, weight: contact.info.extendedFields["custom.lastknownwt"], needsWaiver: true};
+            //$w('#weight1').value = (contact.info.extendedFields["custom.lastknownwt"] === undefined) ? "" : contact.info.extendedFields["custom.lastknownwt"];
+            pilots["pilot1"] = {firstName: contact.firstName, lastName: contact.lastName, pilotEmail: contact.emails[0], waiver: false, weight: "UNK", needsWaiver: true};
+        }).catch(error=>{
+            console.log("Error Getting Contact", error)
         });
         console.log("PILOTS:", pilots)
 }
