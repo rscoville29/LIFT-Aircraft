@@ -202,6 +202,8 @@ export async function checkAndMakeMembers(pilots) {
             loginEmail: pilot.pilotEmail,
             lastName: pilot.firstName,
             firstName: pilot.lastName,
+            lastKnownWeight: pilot.weight,
+            gender: pilot.gender,
             privacyStatus: "PUBLIC"
         }
     };
@@ -490,6 +492,37 @@ $w.onReady(function () {
         shouldAllowAddPilots();
     });
 
+    $w("#gender1").onChange((event)=>{
+        let gender = $w('#gender1').value;
+        pilots["pilot1"].gender = gender;
+        shouldAllowAddPilots();
+    });
+    $w("#gender2").onChange((event)=>{
+        let gender = $w('#gender2').value;
+        pilots["pilot2"].gender = gender;
+        shouldAllowAddPilots();
+    });
+    $w("#gender3").onChange((event)=>{
+        let gender = $w('#gender3').value;
+        pilots["pilot3"].gender = gender;
+        shouldAllowAddPilots();
+    });
+    $w("#gender4").onChange((event)=>{
+        let gender = $w('#gender4').value;
+        pilots["pilot4"].gender = gender;
+        shouldAllowAddPilots();
+    });
+    $w("#gender5").onChange((event)=>{
+        let gender = $w('#gender5').value;
+        pilots["pilot5"].gender = gender;
+        shouldAllowAddPilots();
+    });
+    $w("#gender6").onChange((event)=>{
+        let gender = $w('#gender6').value;
+        pilots["pilot6"].gender = gender;
+        shouldAllowAddPilots();
+    });
+
 
 });
 
@@ -605,7 +638,7 @@ export async function refreshBookingInputTable(book) {
 console.log("running refreshBooking Input table")
     let partySize = book.totalParticipants;
     for(let i = 1; i <= partySize; i++){
-        pilots[`pilot${i}`] = {firstName: null, lastName: null, pilotEmail: null, waiver: false, weight: null, needsWaiver: true}
+        pilots[`pilot${i}`] = {firstName: null, lastName: null, pilotEmail: null, waiver: false, weight: null, needsWaiver: true, gender: null}
     }
     console.log("PILOTS", pilots);
 
@@ -633,7 +666,7 @@ console.log("running refreshBooking Input table")
                     console.log("result line 569", result);
                     $w('#firstName' + i.toString()).value = result.firstName;
                     $w('#lastName' + i.toString()).value = result.lastName;
-                    $w('#gender' + i.toString()).value = result.Gender || "undisclosed";
+                    $w('#gender' + i.toString()).value = result.gender || "undisclosed";
                     $w('#waiver' + i.toString()).checked = (waivers == undefined) ? false : waivers[i - 1];
                     $w('#email' + i.toString()).value = result.emails[0];
                     $w('#weight' + i.toString()).value = result.lastKnownWeight || "";
@@ -650,11 +683,11 @@ console.log("running refreshBooking Input table")
             contact = result;
             $w('#firstName1').value = contact.firstName;
             $w('#lastName1').value = contact.lastName;
-            $w('#gender1').value = contact.Gender || "undisclosed";
+            $w('#gender1').value = contact.gender || "undisclosed";
             $w('#email1').value = contact.emails[0];
             //$w('#waiver1').checked = (waivers == undefined) ? false : waivers[0];
             $w('#weight1').value = contact.lastKnownWeight || "";
-            pilots["pilot1"] = {firstName: contact.firstName, lastName: contact.lastName, pilotEmail: contact.emails[0], waiver: false, weight: "UNK", needsWaiver: true};
+            pilots["pilot1"] = {firstName: contact.firstName, lastName: contact.lastName, pilotEmail: contact.emails[0], waiver: false, weight: "UNK", needsWaiver: true, gender: contact.gender};
         }).catch(error=>{
             console.log("Error Getting Contact", error)
         });
