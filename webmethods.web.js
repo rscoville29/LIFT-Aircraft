@@ -24,6 +24,7 @@ import { members } from "wix-members.v2";
 import { triggeredEmails } from "wix-crm-backend";
 
 export const emailMemberOnVideoUpload = webMethod(Permissions.Anyone, (id, name) => {
+  console.log("Attempting to Email Member On Video Upload..")
   const emailId = "UMfkkiB";
   const memberId = id;
   const options = {
@@ -35,10 +36,10 @@ export const emailMemberOnVideoUpload = webMethod(Permissions.Anyone, (id, name)
   return triggeredEmails
     .emailMember(emailId, memberId, options)
     .then(() => {
-      console.log("Email was sent to member");
+      console.log("Email sent to Member!");
     })
     .catch((error) => {
-      console.error(error);
+      console.error("Error Sending Email to Member!", error);
     });
 });
 
@@ -54,13 +55,13 @@ const elevatedCreateMember = elevate(members.createMember);
 export const myCreateMemberFunction = webMethod(
   Permissions.Anyone,
   async (member) => {
-    try { console.log("trying to create a member")
+    try { console.log("Attempting to create a member")
       const newMember = await elevatedCreateMember(member);
       console.log("Created new member:", newMember);
 
       return newMember;
     } catch (error) {
-      console.error(error);
+      console.error("Error Creating Member!", error);
       // Handle the error
     }
   },
