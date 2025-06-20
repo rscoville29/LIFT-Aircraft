@@ -63,6 +63,10 @@ for (let key of keys) {
                         $w("#image61").show();
                     } else if (key === 'pilot4') {
                         $w("#image62").show();
+                    }else if (key === 'pilot5') {
+                        $w("#image64").show();
+                    }else if (key === 'pilot6') {
+                        $w("#image65").show();
                     }
                 }
             })
@@ -79,6 +83,10 @@ for (let key of keys) {
                         $w("#image61").show();
                     } else if (key === 'pilot4') {
                         $w("#image62").show();
+                    }else if (key === 'pilot5') {
+                        $w("#image64").show();
+                    }else if (key === 'pilot6') {
+                        $w("#image65").show();
                     }
 
     }
@@ -240,6 +248,8 @@ $w.onReady(function () {
     $w("#image60").hide();
     $w("#image61").hide();
     $w("#image62").hide();
+    $w("#image64").hide();
+    $w("#image65").hide();
     $w("#saveNowButton").hide();
     $w('#dayTable').rows = [];
     $w('#dayTable').columns = [{
@@ -354,6 +364,28 @@ $w.onReady(function () {
         console.log(pilots);
         shouldShowAddPilotsButton();
     });
+    $w('#email5').onChange((event)=>{
+         let currentEmail = $w("#email5").value;
+         console.log("CURRENT EMAIL:", currentEmail);
+        if(validateEmail(currentEmail)){
+            pilots["pilot5"].pilotEmail = currentEmail;
+        }else{
+            pilots["pilot5"].pilotEmail = null;
+        }
+        console.log(pilots);
+        shouldShowAddPilotsButton();
+    });
+    $w('#email6').onChange((event)=>{
+         let currentEmail = $w("#email6").value;
+         console.log("CURRENT EMAIL:", currentEmail);
+        if(validateEmail(currentEmail)){
+            pilots["pilot6"].pilotEmail = currentEmail;
+        }else{
+            pilots["pilot6"].pilotEmail = null;
+        }
+        console.log(pilots);
+        shouldShowAddPilotsButton();
+    });
 
     $w("#firstName1").onChange((event)=>{
         let currentName = $w("#firstName1").value;
@@ -377,6 +409,16 @@ $w.onReady(function () {
           $w("#firstName4").onChange((event)=>{
         let currentName = $w("#firstName4").value;
             pilots["pilot4"].firstName = currentName;
+            shouldShowAddPilotsButton();
+    })
+    $w("#firstName5").onChange((event)=>{
+        let currentName = $w("#firstName5").value;
+            pilots["pilot5"].firstName = currentName;
+            shouldShowAddPilotsButton();
+    })
+    $w("#firstName6").onChange((event)=>{
+        let currentName = $w("#firstName6").value;
+            pilots["pilot6"].firstName = currentName;
             shouldShowAddPilotsButton();
     })
 
@@ -403,6 +445,16 @@ $w.onReady(function () {
             pilots["pilot4"].lastName = currentName;
             shouldShowAddPilotsButton();
     })
+    $w("#lastName5").onChange((event)=>{
+        let currentName = $w("#lastName5").value;
+            pilots["pilot5"].lastName = currentName;
+            shouldShowAddPilotsButton();
+    })
+    $w("#lastName6").onChange((event)=>{
+        let currentName = $w("#lastName6").value;
+            pilots["pilot6"].lastName = currentName;
+            shouldShowAddPilotsButton();
+    })
 
     $w("#weight1").onChange((event)=>{
         let currentWeight = $w('#weight1').value;
@@ -425,6 +477,16 @@ $w.onReady(function () {
         $w("#weight4").onChange((event)=>{
         let currentWeight = $w('#weight4').value;
         pilots["pilot4"].weight = currentWeight;
+        shouldShowAddPilotsButton();
+    });
+     $w("#weight5").onChange((event)=>{
+        let currentWeight = $w('#weight5').value;
+        pilots["pilot5"].weight = currentWeight;
+        shouldShowAddPilotsButton();
+    });
+     $w("#weight6").onChange((event)=>{
+        let currentWeight = $w('#weight6').value;
+        pilots["pilot6"].weight = currentWeight;
         shouldShowAddPilotsButton();
     });
 
@@ -450,7 +512,6 @@ export function setCalendarToDate(date) {
             result._items.forEach(element => {
                 let ssn = getSessionOfBooking(element._id)
                     .then(function (session) {
-
                         let time = new Date(session.start.timestamp).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
                         let firstName = element.formInfo.contactDetails.firstName;
                         let lastName = element.formInfo.contactDetails.lastName;
@@ -541,7 +602,7 @@ export function dayTable_rowSelect(event) {
 }
 
 export async function refreshBookingInputTable(book) {
-
+console.log("running refreshBooking Input table")
     let partySize = book.totalParticipants;
     for(let i = 1; i <= partySize; i++){
         pilots[`pilot${i}`] = {firstName: null, lastName: null, pilotEmail: null, waiver: false, weight: null, needsWaiver: true}
@@ -551,12 +612,14 @@ export async function refreshBookingInputTable(book) {
     $w('#group2').collapse();
     $w('#group3').collapse();
     $w('#group4').collapse();
+    $w('#group5').collapse();
+    $w('#group6').collapse();
     
 
     let emails = await getCompanion(book._id);
     let waivers = await getWaivers(book._id);
 
-    for (let i = 2; i < 5; i++) {
+    for (let i = 2; i < 7; i++) {
         $w('#firstName' + i.toString()).value = "";
         $w('#lastName' + i.toString()).value = "";
         $w('#gender' + i.toString()).value = "undisclosed";
@@ -567,12 +630,13 @@ export async function refreshBookingInputTable(book) {
             $w('#group' + i.toString()).expand();
             if (emails !== undefined && emails.length > i - 1) {
                 getContactByEmail(emails[i - 1]).then(result => {
-                    $w('#firstName' + i.toString()).value = result.info.name.first;
-                    $w('#lastName' + i.toString()).value = result.info.name.last;
-                    $w('#gender' + i.toString()).value = (result.info.extendedFields["custom.gender"] === undefined) ? "undisclosed" : result.info.extendedFields["custom.gender"];
+                    console.log("result line 569", result);
+                    $w('#firstName' + i.toString()).value = result.firstName;
+                    $w('#lastName' + i.toString()).value = result.lastName;
+                    //$w('#gender' + i.toString()).value = (result.info.extendedFields["custom.gender"] === undefined) ? "undisclosed" : result.info.extendedFields["custom.gender"];
                     $w('#waiver' + i.toString()).checked = (waivers == undefined) ? false : waivers[i - 1];
-                    $w('#email' + i.toString()).value = result.primaryInfo.email;
-                    $w('#weight' + i.toString()).value = (result.info.extendedFields["custom.lastknownwt"] === undefined) ? "" : result.info.extendedFields["custom.lastknownwt"];
+                    $w('#email' + i.toString()).value = result.emails[0];
+                    //$w('#weight' + i.toString()).value = (result.info.extendedFields["custom.lastknownwt"] === undefined) ? "" : result.info.extendedFields["custom.lastknownwt"];
                     
                 });
             }
@@ -583,14 +647,17 @@ export async function refreshBookingInputTable(book) {
 
     getContact(book.formInfo.contactDetails.contactId)
         .then(result => {
+            console.log("result line 586", result);
             contact = result;
-            $w('#firstName1').value = contact.info.name.first;
-            $w('#lastName1').value = contact.info.name.last;
-            $w('#gender1').value = (contact.info.extendedFields["custom.gender"] === undefined) ? "undisclosed" : contact.info.extendedFields["custom.gender"];
-            $w('#email1').value = contact.primaryInfo.email;
+            $w('#firstName1').value = contact.firstName;
+            $w('#lastName1').value = contact.lastName;
+            //$w('#gender1').value = (contact.info.extendedFields["custom.gender"] === undefined) ? "undisclosed" : contact.info.extendedFields["custom.gender"];
+            $w('#email1').value = contact.emails[0];
             //$w('#waiver1').checked = (waivers == undefined) ? false : waivers[0];
-            $w('#weight1').value = (contact.info.extendedFields["custom.lastknownwt"] === undefined) ? "" : contact.info.extendedFields["custom.lastknownwt"];
-            pilots["pilot1"] = {firstName: contact.info.name.first, lastName: contact.info.name.last, pilotEmail: contact.primaryInfo.email, waiver: false, weight: contact.info.extendedFields["custom.lastknownwt"], needsWaiver: true};
+            //$w('#weight1').value = (contact.info.extendedFields["custom.lastknownwt"] === undefined) ? "" : contact.info.extendedFields["custom.lastknownwt"];
+            pilots["pilot1"] = {firstName: contact.firstName, lastName: contact.lastName, pilotEmail: contact.emails[0], waiver: false, weight: "UNK", needsWaiver: true};
+        }).catch(error=>{
+            console.log("Error Getting Contact", error)
         });
         console.log("PILOTS:", pilots)
 }
