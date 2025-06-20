@@ -14,6 +14,7 @@ let booking = null;
 let contact = null;
 let pilots = {};
 let location;
+let allowAddPilots = false;
 
 export async function checkInPilots(pilots){
     const keys = Object.keys(pilots);
@@ -201,6 +202,8 @@ export async function checkAndMakeMembers(pilots) {
             loginEmail: pilot.pilotEmail,
             lastName: pilot.firstName,
             firstName: pilot.lastName,
+            lastKnownWeight: pilot.weight,
+            gender: pilot.gender,
             privacyStatus: "PUBLIC"
         }
     };
@@ -250,7 +253,6 @@ $w.onReady(function () {
     $w("#image62").hide();
     $w("#image64").hide();
     $w("#image65").hide();
-    $w("#saveNowButton").hide();
     $w('#dayTable').rows = [];
     $w('#dayTable').columns = [{
             "id": "id",
@@ -340,7 +342,7 @@ $w.onReady(function () {
             pilots["pilot2"].pilotEmail = null;
         }
         console.log(pilots);
-        shouldShowAddPilotsButton();
+        shouldAllowAddPilots();
     });
     $w('#email3').onChange((event)=>{
          let currentEmail = $w("#email3").value;
@@ -351,7 +353,7 @@ $w.onReady(function () {
             pilots["pilot3"].pilotEmail = null;
         }
         console.log(pilots);
-        shouldShowAddPilotsButton();
+        shouldAllowAddPilots();
     });
     $w('#email4').onChange((event)=>{
          let currentEmail = $w("#email4").value;
@@ -362,7 +364,7 @@ $w.onReady(function () {
             pilots["pilot4"].pilotEmail = null;
         }
         console.log(pilots);
-        shouldShowAddPilotsButton();
+        shouldAllowAddPilots();
     });
     $w('#email5').onChange((event)=>{
          let currentEmail = $w("#email5").value;
@@ -373,7 +375,7 @@ $w.onReady(function () {
             pilots["pilot5"].pilotEmail = null;
         }
         console.log(pilots);
-        shouldShowAddPilotsButton();
+        shouldAllowAddPilots();
     });
     $w('#email6').onChange((event)=>{
          let currentEmail = $w("#email6").value;
@@ -384,110 +386,141 @@ $w.onReady(function () {
             pilots["pilot6"].pilotEmail = null;
         }
         console.log(pilots);
-        shouldShowAddPilotsButton();
+        shouldAllowAddPilots();
     });
 
     $w("#firstName1").onChange((event)=>{
         let currentName = $w("#firstName1").value;
             pilots["pilot1"].firstName = currentName;
-            shouldShowAddPilotsButton();
+            shouldAllowAddPilots();
 
     })
 
        $w("#firstName2").onChange((event)=>{
         let currentName = $w("#firstName2").value;
             pilots["pilot2"].firstName = currentName;
-            shouldShowAddPilotsButton();
+            shouldAllowAddPilots();
     })
 
       $w("#firstName3").onChange((event)=>{
         let currentName = $w("#firstName3").value;
             pilots["pilot3"].firstName = currentName;
-            shouldShowAddPilotsButton();
+            shouldAllowAddPilots();
     })
 
           $w("#firstName4").onChange((event)=>{
         let currentName = $w("#firstName4").value;
             pilots["pilot4"].firstName = currentName;
-            shouldShowAddPilotsButton();
+            shouldAllowAddPilots();
     })
     $w("#firstName5").onChange((event)=>{
         let currentName = $w("#firstName5").value;
             pilots["pilot5"].firstName = currentName;
-            shouldShowAddPilotsButton();
+            shouldAllowAddPilots();
     })
     $w("#firstName6").onChange((event)=>{
         let currentName = $w("#firstName6").value;
             pilots["pilot6"].firstName = currentName;
-            shouldShowAddPilotsButton();
+            shouldAllowAddPilots();
     })
 
     $w("#lastName1").onChange((event)=>{
         let currentName = $w("#lastName1").value;
             pilots["pilot1"].lastName = currentName;
-            shouldShowAddPilotsButton();
+            shouldAllowAddPilots();
     })
 
         $w("#lastName2").onChange((event)=>{
         let currentName = $w("#lastName2").value;
             pilots["pilot2"].lastName = currentName;
-            shouldShowAddPilotsButton();
+            shouldAllowAddPilots();
     })
 
         $w("#lastName3").onChange((event)=>{
         let currentName = $w("#lastName3").value;
             pilots["pilot3"].lastName = currentName;
-            shouldShowAddPilotsButton();
+            shouldAllowAddPilots();
     })
 
         $w("#lastName4").onChange((event)=>{
         let currentName = $w("#lastName4").value;
             pilots["pilot4"].lastName = currentName;
-            shouldShowAddPilotsButton();
+            shouldAllowAddPilots();
     })
     $w("#lastName5").onChange((event)=>{
         let currentName = $w("#lastName5").value;
             pilots["pilot5"].lastName = currentName;
-            shouldShowAddPilotsButton();
+            shouldAllowAddPilots();
     })
     $w("#lastName6").onChange((event)=>{
         let currentName = $w("#lastName6").value;
             pilots["pilot6"].lastName = currentName;
-            shouldShowAddPilotsButton();
+            shouldAllowAddPilots();
     })
 
     $w("#weight1").onChange((event)=>{
         let currentWeight = $w('#weight1').value;
         pilots["pilot1"].weight = currentWeight;
-        shouldShowAddPilotsButton();
+        shouldAllowAddPilots();
     });
 
         $w("#weight2").onChange((event)=>{
         let currentWeight = $w('#weight2').value;
         pilots["pilot2"].weight = currentWeight;
-        shouldShowAddPilotsButton();
+        shouldAllowAddPilots();
     });
 
         $w("#weight3").onChange((event)=>{
         let currentWeight = $w('#weight3').value;
         pilots["pilot3"].weight = currentWeight;
-        shouldShowAddPilotsButton();
+        shouldAllowAddPilots();
     });
 
         $w("#weight4").onChange((event)=>{
         let currentWeight = $w('#weight4').value;
         pilots["pilot4"].weight = currentWeight;
-        shouldShowAddPilotsButton();
+        shouldAllowAddPilots();
     });
      $w("#weight5").onChange((event)=>{
         let currentWeight = $w('#weight5').value;
         pilots["pilot5"].weight = currentWeight;
-        shouldShowAddPilotsButton();
+        shouldAllowAddPilots();
     });
      $w("#weight6").onChange((event)=>{
         let currentWeight = $w('#weight6').value;
         pilots["pilot6"].weight = currentWeight;
-        shouldShowAddPilotsButton();
+        shouldAllowAddPilots();
+    });
+
+    $w("#gender1").onChange((event)=>{
+        let gender = $w('#gender1').value;
+        pilots["pilot1"].gender = gender;
+        shouldAllowAddPilots();
+    });
+    $w("#gender2").onChange((event)=>{
+        let gender = $w('#gender2').value;
+        pilots["pilot2"].gender = gender;
+        shouldAllowAddPilots();
+    });
+    $w("#gender3").onChange((event)=>{
+        let gender = $w('#gender3').value;
+        pilots["pilot3"].gender = gender;
+        shouldAllowAddPilots();
+    });
+    $w("#gender4").onChange((event)=>{
+        let gender = $w('#gender4').value;
+        pilots["pilot4"].gender = gender;
+        shouldAllowAddPilots();
+    });
+    $w("#gender5").onChange((event)=>{
+        let gender = $w('#gender5').value;
+        pilots["pilot5"].gender = gender;
+        shouldAllowAddPilots();
+    });
+    $w("#gender6").onChange((event)=>{
+        let gender = $w('#gender6').value;
+        pilots["pilot6"].gender = gender;
+        shouldAllowAddPilots();
     });
 
 
@@ -605,7 +638,7 @@ export async function refreshBookingInputTable(book) {
 console.log("running refreshBooking Input table")
     let partySize = book.totalParticipants;
     for(let i = 1; i <= partySize; i++){
-        pilots[`pilot${i}`] = {firstName: null, lastName: null, pilotEmail: null, waiver: false, weight: null, needsWaiver: true}
+        pilots[`pilot${i}`] = {firstName: null, lastName: null, pilotEmail: null, waiver: false, weight: null, needsWaiver: true, gender: null}
     }
     console.log("PILOTS", pilots);
 
@@ -633,11 +666,10 @@ console.log("running refreshBooking Input table")
                     console.log("result line 569", result);
                     $w('#firstName' + i.toString()).value = result.firstName;
                     $w('#lastName' + i.toString()).value = result.lastName;
-                    //$w('#gender' + i.toString()).value = (result.info.extendedFields["custom.gender"] === undefined) ? "undisclosed" : result.info.extendedFields["custom.gender"];
+                    $w('#gender' + i.toString()).value = result.gender || "undisclosed";
                     $w('#waiver' + i.toString()).checked = (waivers == undefined) ? false : waivers[i - 1];
                     $w('#email' + i.toString()).value = result.emails[0];
-                    //$w('#weight' + i.toString()).value = (result.info.extendedFields["custom.lastknownwt"] === undefined) ? "" : result.info.extendedFields["custom.lastknownwt"];
-                    
+                    $w('#weight' + i.toString()).value = result.lastKnownWeight || "";
                 });
             }
         }
@@ -651,11 +683,11 @@ console.log("running refreshBooking Input table")
             contact = result;
             $w('#firstName1').value = contact.firstName;
             $w('#lastName1').value = contact.lastName;
-            //$w('#gender1').value = (contact.info.extendedFields["custom.gender"] === undefined) ? "undisclosed" : contact.info.extendedFields["custom.gender"];
+            $w('#gender1').value = contact.gender || "undisclosed";
             $w('#email1').value = contact.emails[0];
             //$w('#waiver1').checked = (waivers == undefined) ? false : waivers[0];
-            //$w('#weight1').value = (contact.info.extendedFields["custom.lastknownwt"] === undefined) ? "" : contact.info.extendedFields["custom.lastknownwt"];
-            pilots["pilot1"] = {firstName: contact.firstName, lastName: contact.lastName, pilotEmail: contact.emails[0], waiver: false, weight: "UNK", needsWaiver: true};
+            $w('#weight1').value = contact.lastKnownWeight || "";
+            pilots["pilot1"] = {firstName: contact.firstName, lastName: contact.lastName, pilotEmail: contact.emails[0], waiver: false, weight: "UNK", needsWaiver: true, gender: contact.gender};
         }).catch(error=>{
             console.log("Error Getting Contact", error)
         });
@@ -692,6 +724,9 @@ export function datePicker_change(event) {
 *	 @param {$w.MouseEvent} event
 */
 export async function saveNowButton_click(event) {
+    if(allowAddPilots === false){
+        return;
+    }
     checkAndMakeMembers(pilots);
 
     /*
@@ -788,7 +823,7 @@ export function validateEmail(email) {
     }
 }
 
-export function shouldShowAddPilotsButton(){
+export function shouldAllowAddPilots(){
  let allValid = true;
 for (let pilot in pilots) {
         let pilotInfo = pilots[pilot];
@@ -806,8 +841,8 @@ for (let pilot in pilots) {
 }
 console.log("ALL VALID?", allValid);
 if(allValid){
-    $w('#saveNowButton').show();
+    allowAddPilots = true;
 }else if(!allValid){
-    $w('#saveNowButton').hide();
+    allowAddPilots = false;
 }
 }
