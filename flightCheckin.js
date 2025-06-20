@@ -633,11 +633,10 @@ console.log("running refreshBooking Input table")
                     console.log("result line 569", result);
                     $w('#firstName' + i.toString()).value = result.firstName;
                     $w('#lastName' + i.toString()).value = result.lastName;
-                    //$w('#gender' + i.toString()).value = (result.info.extendedFields["custom.gender"] === undefined) ? "undisclosed" : result.info.extendedFields["custom.gender"];
+                    $w('#gender' + i.toString()).value = result.Gender || "undisclosed";
                     $w('#waiver' + i.toString()).checked = (waivers == undefined) ? false : waivers[i - 1];
                     $w('#email' + i.toString()).value = result.emails[0];
-                    //$w('#weight' + i.toString()).value = (result.info.extendedFields["custom.lastknownwt"] === undefined) ? "" : result.info.extendedFields["custom.lastknownwt"];
-                    
+                    $w('#weight' + i.toString()).value = result.lastKnownWeight || "";
                 });
             }
         }
@@ -651,10 +650,10 @@ console.log("running refreshBooking Input table")
             contact = result;
             $w('#firstName1').value = contact.firstName;
             $w('#lastName1').value = contact.lastName;
-            //$w('#gender1').value = (contact.info.extendedFields["custom.gender"] === undefined) ? "undisclosed" : contact.info.extendedFields["custom.gender"];
+            $w('#gender1').value = contact.Gender || "undisclosed";
             $w('#email1').value = contact.emails[0];
             //$w('#waiver1').checked = (waivers == undefined) ? false : waivers[0];
-            //$w('#weight1').value = (contact.info.extendedFields["custom.lastknownwt"] === undefined) ? "" : contact.info.extendedFields["custom.lastknownwt"];
+            $w('#weight1').value = contact.lastKnownWeight || "";
             pilots["pilot1"] = {firstName: contact.firstName, lastName: contact.lastName, pilotEmail: contact.emails[0], waiver: false, weight: "UNK", needsWaiver: true};
         }).catch(error=>{
             console.log("Error Getting Contact", error)
