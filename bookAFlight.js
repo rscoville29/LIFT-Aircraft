@@ -93,7 +93,7 @@ $w.onReady(async function () {
 
     const _services = await wixData.query("Bookings/Services").find({ suppressAuth: true })
     services = _services.items;
-    console.log("SERVICES",services)
+    
 
     const options = {
         startDateTime: new Date(),
@@ -104,15 +104,15 @@ $w.onReady(async function () {
 
         let serviceID = service._id;
         const availability = await wixBookings.getServiceAvailability(serviceID, options);
-        console.log("AVAILABILITY:", availability)
+        
         const availableSlots = availability.slots;
         for (const slot of availableSlots) {
             availableSlotsIn365Days.push(slot);
             let addrArray = slot.location.businessLocation.address.formatted.split(" ")
-            console.log(addrArray);
+            
             let city = addrArray[4];
             let subdivision = addrArray[5];
-            console.log("City and Sub", city, subdivision);
+            
             
             const addr = {
                 label: city === 'Austin,' ? "Austin, TX - The Long Center" : city + " " +
@@ -153,7 +153,7 @@ $w.onReady(async function () {
         opts.push(addr);
 
     }
-    console.log('OPTS:', opts)
+    
 
     availableSlotsIn365Days.sort(function (a, b) {
         return a.startDateTime.getTime() - b.startDateTime.getTime();
@@ -189,6 +189,7 @@ function getSunday(d) {
 function addMonth(date, month) {
     let result = new Date(date);
     result.setMonth(result.getMonth() + month);
+    console.log("add month result", result);
     return result;
 }
 
@@ -234,7 +235,6 @@ function indexOfObject(obj, list) {
 }
 
 function refreshCalendar(location, partySize, selectedDate) {
-    console.log("Refreshing calendar", location, partySize, selectedDate);
     // Collect list of bookable dates at filtered location in a year
     let bookableDates = [];
     let waitlistedDates = [];
@@ -338,7 +338,6 @@ function refreshCalendar(location, partySize, selectedDate) {
 }
 
 function refreshSlots(location, numberOfFlights, startDate, endDate) {
-    console.log("refreshing slots", location, numberOfFlights, startDate, endDate);
     selectableSlots = [];
     //hardcoding a solution to depict Austin, TX when Florence, TX. A more preferred solution would be to update the location of the service itself. 
     const locationText = (location)=>{
@@ -354,7 +353,7 @@ function refreshSlots(location, numberOfFlights, startDate, endDate) {
         $w('#slotSection').hide();
         return;
     }
-    console.log("LOCATION", location);
+    
     
 
     let loc = location == "ALL" ? "" : "in <strong>" + locationText(location) + "</strong>";
@@ -654,7 +653,6 @@ export function btnCheckout_click(event) {
     // booking checkout  
     wixBookingsFrontend.checkoutBooking(bookingInfo, options)
         .then((result) => {
-            console.log(options);
             if (result.status === "Confirmed") {
                 $w('#bookingWizard').changeState("thankyou");
                 //$w('#bookingWizard').scrollTo();
