@@ -9,6 +9,7 @@ import wixWindowFrontend from "wix-window-frontend";
 
 let deviceType = wixWindowFrontend.formFactor;
 const today = new Date();
+console.log("today:", today)
 const firstDayOfTodaysMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 let initialVisit = true;
 
@@ -45,14 +46,30 @@ let selectedDate = today;
 let totalPrice = 0;
 let mediaPackage = 0;
 let couponCode = "";
+let weatherForecast;
 
 let USDollar = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
 });
 
+export async function getFormattedWeather() {
+  const result = await wixData.query("longCenterWeather")
+    .limit(1)
+    .find();
+    if (result.items.length === 0) {
+        console.log("No Weather data found!")
+    return;
+  }
+  const data = result.items[0].weatherObject.forecast.forecastday;
+    return data;
+}
+
+
 
 $w.onReady(async function () {
+    weatherForecast = await getFormattedWeather();
+    console.log("Forecast:", weatherForecast);
     //hiding yearMonth element to use the text element instead to solve the problem of the dropdown arrow
     $w('#yearMonth').hide();
     let yearMonthValues = [];
@@ -189,7 +206,6 @@ function getSunday(d) {
 function addMonth(date, month) {
     let result = new Date(date);
     result.setMonth(result.getMonth() + month);
-    console.log("add month result", result);
     return result;
 }
 
@@ -828,6 +844,7 @@ export function txtMedia_click(event) {
 export function dayClick(event) {
 
     selectedDate = calButtonDates[indexOfObject(event.target, calDayButtons)];
+    console.log('selected date: ', selectedDate)
     refreshCalendar($w('#locationDropdown').value, Number($w('#numberOfFlightsDropdown').value), selectedDate);
 
 }
