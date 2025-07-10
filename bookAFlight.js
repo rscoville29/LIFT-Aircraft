@@ -35,6 +35,17 @@ let calDayButtons = [$w('#sun1'), $w('#mon1'), $w('#tue1'), $w('#wed1'), $w('#th
     $w('#sun6'), $w('#mon6'), $w('#tue6'), $w('#wed6'), $w('#thu6'), $w('#fri6'), $w('#sat6')
 ];
 
+let weatherDots = [
+  $w('#weather0'), $w('#weather1'), $w('#weather2'), $w('#weather3'), $w('#weather4'), $w('#weather5'), $w('#weather6'),
+  $w('#weather7'), $w('#weather8'), $w('#weather9'), $w('#weather10'), $w('#weather11'), $w('#weather12'), $w('#weather13'),
+  $w('#weather14'), $w('#weather15'), $w('#weather16'), $w('#weather17'), $w('#weather18'), $w('#weather19'), $w('#weather20'),
+  $w('#weather21'), $w('#weather22'), $w('#weather23'), $w('#weather24'), $w('#weather25'), $w('#weather26'), $w('#weather27'),
+  $w('#weather28'), $w('#weather29'), $w('#weather30'), $w('#weather31'), $w('#weather32'), $w('#weather33'), $w('#weather34'),
+  $w('#weather35'), $w('#weather36'), $w('#weather37'), $w('#weather38'), $w('#weather39'), $w('#weather40'), $w('#weather41')
+];
+
+
+
 let calButtonDates = [];
 let member = null;
 let services = [];
@@ -250,6 +261,45 @@ function indexOfObject(obj, list) {
     return -1;
 }
 
+export function createCTDateFromYMD(dateString) {
+  // Parse string as year, month, day
+  let [year, month, day] = dateString.split('-').map(Number);
+
+  // Central Time is UTC-6 in standard time, UTC-5 during DST
+  // Get current offset from UTC for Central Time on that date
+  let approxDate = new Date(Date.UTC(year, month - 1, day));
+  let ctOffset = getCentralTimeOffset(approxDate); // in minutes
+
+  // Subtract CT offset from UTC to simulate CT-local midnight
+  return new Date(Date.UTC(year, month - 1, day, 0, -ctOffset));
+}
+
+export function getCentralTimeOffset(date) {
+  // "America/Chicago" observes daylight savings
+  return -1 * new Date(date.toLocaleString("en-US", { timeZone: "America/Chicago" })).getTimezoneOffset();
+}
+
+
+export function updateWeatherDots(calendarArray) {
+  let targetDate = createCTDateFromYMD(weatherForecast[0].date);
+  let index = calendarArray.findIndex(date =>
+    date.getUTCFullYear() === targetDate.getUTCFullYear() &&
+    date.getUTCMonth() === targetDate.getUTCMonth() &&
+    date.getUTCDate() === targetDate.getUTCDate()
+  );
+  console.log('Index of date', index);
+  console.log("date should be:", calendarArray[index]);
+
+  return;
+
+  // to use later
+  for (let day of weatherForecast) {
+    // ...
+  }
+}
+
+
+
 function refreshCalendar(location, partySize, selectedDate) {
     // Collect list of bookable dates at filtered location in a year
     let bookableDates = [];
@@ -350,6 +400,7 @@ function refreshCalendar(location, partySize, selectedDate) {
         }
 
     });
+    updateWeatherDots(calButtonDates)
     refreshSlots(location, partySize, selectedDate, selectedDate);
 }
 
@@ -842,7 +893,7 @@ export function txtMedia_click(event) {
 *	 @param {$w.MouseEvent} event
 */
 export function dayClick(event) {
-
+    console.log(event.target);
     selectedDate = calButtonDates[indexOfObject(event.target, calDayButtons)];
     console.log('selected date: ', selectedDate)
     refreshCalendar($w('#locationDropdown').value, Number($w('#numberOfFlightsDropdown').value), selectedDate);
