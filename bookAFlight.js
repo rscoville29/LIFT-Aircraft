@@ -279,8 +279,61 @@ export function getCentralTimeOffset(date) {
   return -1 * new Date(date.toLocaleString("en-US", { timeZone: "America/Chicago" })).getTimezoneOffset();
 }
 
+function getStdDevForDay(day) {
+  const lookup = {
+    1: 2,
+    2: 3,
+    3: 4,
+    4: 5,
+    5: 5.5,
+    6: 6,
+    7: 6.5
+  };
+  return lookup[day] || 6.5;
+}
+
+export function normalCDF(x, mean, std) {
+  return 0.5 * (1 + erf((x - mean) / (std * Math.sqrt(2))));
+}
+
+export function erf(x) {
+  const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741;
+  const a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+  const sign = x < 0 ? -1 : 1;
+  x = Math.abs(x);
+  const t = 1 / (1 + p * x);
+  const y = 1 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+  return sign * y;
+}
+
+export function classifyWind(meanWind, meanGust, forecastDay) {
+  const std = getStdDevForDay(forecastDay);
+
+  const windThreshold = 15; // knots
+  const gustThreshold = 20; // knots
+
+  const probWind = 1 - normalCDF(windThreshold, meanWind, std);
+  const probGust = 1 - normalCDF(gustThreshold, meanGust, std);
+
+  const worstProb = Math.max(probWind, probGust); // Be conservative
+
+  if (worstProb < 0.3) return "Good";
+  if (worstProb < 0.7) return "Marginal";
+  return "Bad";
+}
+
+export function getAverageGusts (hours){
+    let total = 0;
+    for (let hour of hours){
+        total += hour.gust_mpg;
+    }
+    return total / hours.length;
+}
 
 export function updateWeatherDots(calendarArray) {
+const green = "#4CAF50";
+const yellow = "#FFC107";
+const red = "#F44336";
   let targetDate = createCTDateFromYMD(weatherForecast[0].date);
   let index = calendarArray.findIndex(date =>
     date.getUTCFullYear() === targetDate.getUTCFullYear() &&
@@ -290,11 +343,33 @@ export function updateWeatherDots(calendarArray) {
   console.log('Index of date', index);
   console.log("date should be:", calendarArray[index]);
 
-  return;
-
-  // to use later
-  for (let day of weatherForecast) {
-    // ...
+  for (let i = 0; i < weatherForecast.length; i++) {
+    let meanWind = weatherForecast[i].day.maxwind_mph;
+    let meanGust = getAverageGusts(weatherForecast[i].hour)
+    let dailyChanceOfRain = weatherForecast[i].day.daily_chance_of_rain;
+    if(i === 0){
+        //don't use probability calculations if today
+        if(meanWind < 15 && dailyChanceOfRain < .30 && meanGust < 20){
+            //set first day to green;
+        }else if(meanWind <= 15 && meanGust <= 20 && dailyChanceOfRain > .30 && dailyChanceOfRain < .70){
+            //set first day to yellow
+        }else{
+            //set first day to red
+        }
+        
+    }else{
+        let windCondition = classifyWind(meanWind, meanGust, i);
+        if(windCondition === "Good" && dailyChanceOfRain < .3){
+            //set to green;
+        }
+        else if(windCondition === "Marginal" || (dailyChanceOfRain > .3 && dailyChanceOfRain < .7)){
+            //set to yellow;
+        }
+        else {
+            //set to red;
+        }
+    }
+    index++
   }
 }
 
