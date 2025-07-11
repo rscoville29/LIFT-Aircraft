@@ -325,7 +325,7 @@ export function classifyWind(meanWind, meanGust, forecastDay) {
 export function getAverageGusts (hours){
     let total = 0;
     for (let hour of hours){
-        total += hour.gust_mpg;
+        total += hour.gust_mph;
     }
     return total / hours.length;
 }
@@ -351,26 +351,46 @@ const red = "#F44336";
         //don't use probability calculations if today
         if(meanWind < 15 && dailyChanceOfRain < .30 && meanGust < 20){
             //set first day to green;
+            console.log("setting first day to green", meanWind, meanGust, dailyChanceOfRain)
+            $w(`#weather${index}`).style.backgroundColor = "#4CAF50";
+            $w(`#weather${index}`).style.opacity = 1;
         }else if(meanWind <= 15 && meanGust <= 20 && dailyChanceOfRain > .30 && dailyChanceOfRain < .70){
             //set first day to yellow
+            console.log("setting first day to yellow", meanWind, meanGust, dailyChanceOfRain)
+            $w(`#weather${index}`).style.backgroundColor = yellow;
+            $w(`#weather${index}`).style.opacity = 1;
         }else{
             //set first day to red
+            console.log("setting first day to red", meanWind, meanGust, dailyChanceOfRain)
+            $w(`#weather${index}`).style.backgroundColor = red;
+            $w(`#weather${index}`).style.opacity = 1;
         }
         
     }else{
         let windCondition = classifyWind(meanWind, meanGust, i);
         if(windCondition === "Good" && dailyChanceOfRain < .3){
             //set to green;
+            console.log("setting day to green", windCondition, dailyChanceOfRain)
+            $w(`#weather${index}`).style.backgroundColor = "#4CAF50";
+            $w(`#weather${index}`).style.opacity = 1;
+
         }
         else if(windCondition === "Marginal" || (dailyChanceOfRain > .3 && dailyChanceOfRain < .7)){
             //set to yellow;
+            console.log("setting day to yellow", windCondition, dailyChanceOfRain)
+            $w(`#weather${index}`).style.backgroundColor = yellow;
+            $w(`#weather${index}`).style.opacity = 1;
         }
         else {
             //set to red;
+            console.log("setting day to red", windCondition, dailyChanceOfRain)
+            $w(`#weather${index}`).style.backgroundColor = red;
+            $w(`#weather${index}`).style.opacity = 1;
         }
     }
     index++
   }
+  return;
 }
 
 
