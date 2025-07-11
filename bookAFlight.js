@@ -35,15 +35,49 @@ let calDayButtons = [$w('#sun1'), $w('#mon1'), $w('#tue1'), $w('#wed1'), $w('#th
     $w('#sun6'), $w('#mon6'), $w('#tue6'), $w('#wed6'), $w('#thu6'), $w('#fri6'), $w('#sat6')
 ];
 
-let weatherDots = [
-  $w('#weather0'), $w('#weather1'), $w('#weather2'), $w('#weather3'), $w('#weather4'), $w('#weather5'), $w('#weather6'),
-  $w('#weather7'), $w('#weather8'), $w('#weather9'), $w('#weather10'), $w('#weather11'), $w('#weather12'), $w('#weather13'),
-  $w('#weather14'), $w('#weather15'), $w('#weather16'), $w('#weather17'), $w('#weather18'), $w('#weather19'), $w('#weather20'),
-  $w('#weather21'), $w('#weather22'), $w('#weather23'), $w('#weather24'), $w('#weather25'), $w('#weather26'), $w('#weather27'),
-  $w('#weather28'), $w('#weather29'), $w('#weather30'), $w('#weather31'), $w('#weather32'), $w('#weather33'), $w('#weather34'),
-  $w('#weather35'), $w('#weather36'), $w('#weather37'), $w('#weather38'), $w('#weather39'), $w('#weather40'), $w('#weather41')
+let redWeatherDots = [
+  $w('#redWeather0'), $w('#redWeather1'), $w('#redWeather2'), $w('#redWeather3'),
+  $w('#redWeather4'), $w('#redWeather5'), $w('#redWeather6'), $w('#redWeather7'),
+  $w('#redWeather8'), $w('#redWeather9'), $w('#redWeather10'), $w('#redWeather11'),
+  $w('#redWeather12'), $w('#redWeather13'), $w('#redWeather14'), $w('#redWeather15'),
+  $w('#redWeather16'), $w('#redWeather17'), $w('#redWeather18'), $w('#redWeather19'),
+  $w('#redWeather20'), $w('#redWeather21'), $w('#redWeather22'), $w('#redWeather23'),
+  $w('#redWeather24'), $w('#redWeather25'), $w('#redWeather26'), $w('#redWeather27'),
+  $w('#redWeather28'), $w('#redWeather29'), $w('#redWeather30'), $w('#redWeather31'),
+  $w('#redWeather32'), $w('#redWeather33'), $w('#redWeather34'), $w('#redWeather35'),
+  $w('#redWeather36'), $w('#redWeather37'), $w('#redWeather38'), $w('#redWeather39'),
+  $w('#redWeather40'), $w('#redWeather41')
 ];
 
+
+let yellowWeatherDots = [
+  $w('#yellowWeather0'), $w('#yellowWeather1'), $w('#yellowWeather2'), $w('#yellowWeather3'),
+  $w('#yellowWeather4'), $w('#yellowWeather5'), $w('#yellowWeather6'), $w('#yellowWeather7'),
+  $w('#yellowWeather8'), $w('#yellowWeather9'), $w('#yellowWeather10'), $w('#yellowWeather11'),
+  $w('#yellowWeather12'), $w('#yellowWeather13'), $w('#yellowWeather14'), $w('#yellowWeather15'),
+  $w('#yellowWeather16'), $w('#yellowWeather17'), $w('#yellowWeather18'), $w('#yellowWeather19'),
+  $w('#yellowWeather20'), $w('#yellowWeather21'), $w('#yellowWeather22'), $w('#yellowWeather23'),
+  $w('#yellowWeather24'), $w('#yellowWeather25'), $w('#yellowWeather26'), $w('#yellowWeather27'),
+  $w('#yellowWeather28'), $w('#yellowWeather29'), $w('#yellowWeather30'), $w('#yellowWeather31'),
+  $w('#yellowWeather32'), $w('#yellowWeather33'), $w('#yellowWeather34'), $w('#yellowWeather35'),
+  $w('#yellowWeather36'), $w('#yellowWeather37'), $w('#yellowWeather38'), $w('#yellowWeather39'),
+  $w('#yellowWeather40'), $w('#yellowWeather41')
+];
+
+
+let greenWeatherDots = [
+  $w('#greenWeather0'), $w('#greenWeather1'), $w('#greenWeather2'), $w('#greenWeather3'),
+  $w('#greenWeather4'), $w('#greenWeather5'), $w('#greenWeather6'), $w('#greenWeather7'),
+  $w('#greenWeather8'), $w('#greenWeather9'), $w('#greenWeather10'), $w('#greenWeather11'),
+  $w('#greenWeather12'), $w('#greenWeather13'), $w('#greenWeather14'), $w('#greenWeather15'),
+  $w('#greenWeather16'), $w('#greenWeather17'), $w('#greenWeather18'), $w('#greenWeather19'),
+  $w('#greenWeather20'), $w('#greenWeather21'), $w('#greenWeather22'), $w('#greenWeather23'),
+  $w('#greenWeather24'), $w('#greenWeather25'), $w('#greenWeather26'), $w('#greenWeather27'),
+  $w('#greenWeather28'), $w('#greenWeather29'), $w('#greenWeather30'), $w('#greenWeather31'),
+  $w('#greenWeather32'), $w('#greenWeather33'), $w('#greenWeather34'), $w('#greenWeather35'),
+  $w('#greenWeather36'), $w('#greenWeather37'), $w('#greenWeather38'), $w('#greenWeather39'),
+  $w('#greenWeather40'), $w('#greenWeather41')
+];
 
 
 let calButtonDates = [];
@@ -64,6 +98,20 @@ let USDollar = new Intl.NumberFormat('en-US', {
     currency: 'USD',
 });
 
+export function hideWeatherDots (){
+    console.log("hiding all weather dots");
+    for(let dot of redWeatherDots){
+        dot.hide();
+    }
+    for(let dot of yellowWeatherDots){
+        dot.style.hide();
+    }
+    for(let dot of greenWeatherDots){
+        dot.style.hide();
+    }
+    return;
+}
+
 export async function getFormattedWeather() {
   const result = await wixData.query("longCenterWeather")
     .limit(1)
@@ -79,6 +127,7 @@ export async function getFormattedWeather() {
 
 
 $w.onReady(async function () {
+    hideWeatherDots();
     weatherForecast = await getFormattedWeather();
     console.log("Forecast:", weatherForecast);
     //hiding yearMonth element to use the text element instead to solve the problem of the dropdown arrow
@@ -331,9 +380,6 @@ export function getAverageGusts (hours){
 }
 
 export function updateWeatherDots(calendarArray) {
-const green = "#4CAF50";
-const yellow = "#FFC107";
-const red = "#F44336";
   let targetDate = createCTDateFromYMD(weatherForecast[0].date);
   let index = calendarArray.findIndex(date =>
     date.getUTCFullYear() === targetDate.getUTCFullYear() &&
@@ -351,41 +397,35 @@ const red = "#F44336";
         //don't use probability calculations if today
         if(meanWind < 15 && dailyChanceOfRain < .30 && meanGust < 20){
             //set first day to green;
-            console.log("setting first day to green", meanWind, meanGust, dailyChanceOfRain)
-            $w(`#weather${index}`).style.backgroundColor = "#4CAF50";
-            $w(`#weather${index}`).style.opacity = 1;
+            console.log("setting first day to green", meanWind, meanGust, dailyChanceOfRain, "index:", index)
+            $w(`#greenWeather${index}`).show();
         }else if(meanWind <= 15 && meanGust <= 20 && dailyChanceOfRain > .30 && dailyChanceOfRain < .70){
             //set first day to yellow
-            console.log("setting first day to yellow", meanWind, meanGust, dailyChanceOfRain)
-            $w(`#weather${index}`).style.backgroundColor = yellow;
-            $w(`#weather${index}`).style.opacity = 1;
+            console.log("setting first day to yellow", meanWind, meanGust, dailyChanceOfRain, "index:", index)
+            $w(`#yellowWeather${index}`).show();
         }else{
             //set first day to red
-            console.log("setting first day to red", meanWind, meanGust, dailyChanceOfRain)
-            $w(`#weather${index}`).style.backgroundColor = red;
-            $w(`#weather${index}`).style.opacity = 1;
+            console.log("setting first day to red", meanWind, meanGust, dailyChanceOfRain, "index:", index)
+            $w(`#redWeather${index}`).show();
         }
         
     }else{
         let windCondition = classifyWind(meanWind, meanGust, i);
         if(windCondition === "Good" && dailyChanceOfRain < .3){
             //set to green;
-            console.log("setting day to green", windCondition, dailyChanceOfRain)
-            $w(`#weather${index}`).style.backgroundColor = "#4CAF50";
-            $w(`#weather${index}`).style.opacity = 1;
+            console.log("setting day to green", windCondition, dailyChanceOfRain, "index:", index)
+            $w(`#greenWeather${index}`).show();
 
         }
         else if(windCondition === "Marginal" || (dailyChanceOfRain > .3 && dailyChanceOfRain < .7)){
             //set to yellow;
-            console.log("setting day to yellow", windCondition, dailyChanceOfRain)
-            $w(`#weather${index}`).style.backgroundColor = yellow;
-            $w(`#weather${index}`).style.opacity = 1;
+            console.log("setting day to yellow", windCondition, dailyChanceOfRain, "index:", index)
+            $w(`#yellowWeather${index}`).show();
         }
         else {
             //set to red;
-            console.log("setting day to red", windCondition, dailyChanceOfRain)
-            $w(`#weather${index}`).style.backgroundColor = red;
-            $w(`#weather${index}`).style.opacity = 1;
+            console.log("setting day to red", windCondition, dailyChanceOfRain, "index:", index)
+            $w(`#redWeather${index}`).show();
         }
     }
     index++
