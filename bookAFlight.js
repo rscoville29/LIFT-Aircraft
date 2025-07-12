@@ -9,6 +9,7 @@ import wixWindowFrontend from "wix-window-frontend";
 
 let deviceType = wixWindowFrontend.formFactor;
 const today = new Date();
+console.log("today:", today)
 const firstDayOfTodaysMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 let initialVisit = true;
 
@@ -34,6 +35,51 @@ let calDayButtons = [$w('#sun1'), $w('#mon1'), $w('#tue1'), $w('#wed1'), $w('#th
     $w('#sun6'), $w('#mon6'), $w('#tue6'), $w('#wed6'), $w('#thu6'), $w('#fri6'), $w('#sat6')
 ];
 
+let redWeatherDots = [
+  $w('#redWeather0'), $w('#redWeather1'), $w('#redWeather2'), $w('#redWeather3'),
+  $w('#redWeather4'), $w('#redWeather5'), $w('#redWeather6'), $w('#redWeather7'),
+  $w('#redWeather8'), $w('#redWeather9'), $w('#redWeather10'), $w('#redWeather11'),
+  $w('#redWeather12'), $w('#redWeather13'), $w('#redWeather14'), $w('#redWeather15'),
+  $w('#redWeather16'), $w('#redWeather17'), $w('#redWeather18'), $w('#redWeather19'),
+  $w('#redWeather20'), $w('#redWeather21'), $w('#redWeather22'), $w('#redWeather23'),
+  $w('#redWeather24'), $w('#redWeather25'), $w('#redWeather26'), $w('#redWeather27'),
+  $w('#redWeather28'), $w('#redWeather29'), $w('#redWeather30'), $w('#redWeather31'),
+  $w('#redWeather32'), $w('#redWeather33'), $w('#redWeather34'), $w('#redWeather35'),
+  $w('#redWeather36'), $w('#redWeather37'), $w('#redWeather38'), $w('#redWeather39'),
+  $w('#redWeather40'), $w('#redWeather41')
+];
+
+
+let yellowWeatherDots = [
+  $w('#yellowWeather0'), $w('#yellowWeather1'), $w('#yellowWeather2'), $w('#yellowWeather3'),
+  $w('#yellowWeather4'), $w('#yellowWeather5'), $w('#yellowWeather6'), $w('#yellowWeather7'),
+  $w('#yellowWeather8'), $w('#yellowWeather9'), $w('#yellowWeather10'), $w('#yellowWeather11'),
+  $w('#yellowWeather12'), $w('#yellowWeather13'), $w('#yellowWeather14'), $w('#yellowWeather15'),
+  $w('#yellowWeather16'), $w('#yellowWeather17'), $w('#yellowWeather18'), $w('#yellowWeather19'),
+  $w('#yellowWeather20'), $w('#yellowWeather21'), $w('#yellowWeather22'), $w('#yellowWeather23'),
+  $w('#yellowWeather24'), $w('#yellowWeather25'), $w('#yellowWeather26'), $w('#yellowWeather27'),
+  $w('#yellowWeather28'), $w('#yellowWeather29'), $w('#yellowWeather30'), $w('#yellowWeather31'),
+  $w('#yellowWeather32'), $w('#yellowWeather33'), $w('#yellowWeather34'), $w('#yellowWeather35'),
+  $w('#yellowWeather36'), $w('#yellowWeather37'), $w('#yellowWeather38'), $w('#yellowWeather39'),
+  $w('#yellowWeather40'), $w('#yellowWeather41')
+];
+
+
+let greenWeatherDots = [
+  $w('#greenWeather0'), $w('#greenWeather1'), $w('#greenWeather2'), $w('#greenWeather3'),
+  $w('#greenWeather4'), $w('#greenWeather5'), $w('#greenWeather6'), $w('#greenWeather7'),
+  $w('#greenWeather8'), $w('#greenWeather9'), $w('#greenWeather10'), $w('#greenWeather11'),
+  $w('#greenWeather12'), $w('#greenWeather13'), $w('#greenWeather14'), $w('#greenWeather15'),
+  $w('#greenWeather16'), $w('#greenWeather17'), $w('#greenWeather18'), $w('#greenWeather19'),
+  $w('#greenWeather20'), $w('#greenWeather21'), $w('#greenWeather22'), $w('#greenWeather23'),
+  $w('#greenWeather24'), $w('#greenWeather25'), $w('#greenWeather26'), $w('#greenWeather27'),
+  $w('#greenWeather28'), $w('#greenWeather29'), $w('#greenWeather30'), $w('#greenWeather31'),
+  $w('#greenWeather32'), $w('#greenWeather33'), $w('#greenWeather34'), $w('#greenWeather35'),
+  $w('#greenWeather36'), $w('#greenWeather37'), $w('#greenWeather38'), $w('#greenWeather39'),
+  $w('#greenWeather40'), $w('#greenWeather41')
+];
+
+
 let calButtonDates = [];
 let member = null;
 let services = [];
@@ -45,14 +91,45 @@ let selectedDate = today;
 let totalPrice = 0;
 let mediaPackage = 0;
 let couponCode = "";
+let weatherForecast;
 
 let USDollar = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
 });
 
+export function hideWeatherDots (){
+    console.log("hiding all weather dots");
+    for(let dot of redWeatherDots){
+        dot.hide();
+    }
+    for(let dot of yellowWeatherDots){
+        dot.hide();
+    }
+    for(let dot of greenWeatherDots){
+        dot.hide();
+    }
+    return;
+}
+
+export async function getFormattedWeather() {
+  const result = await wixData.query("longCenterWeather")
+    .limit(1)
+    .find();
+    if (result.items.length === 0) {
+        console.log("No Weather data found!")
+    return;
+  }
+  const data = result.items[0].weatherObject.forecast.forecastday;
+    return data;
+}
+
+
 
 $w.onReady(async function () {
+    hideWeatherDots();
+    weatherForecast = await getFormattedWeather();
+    console.log("Forecast:", weatherForecast);
     //hiding yearMonth element to use the text element instead to solve the problem of the dropdown arrow
     $w('#yearMonth').hide();
     let yearMonthValues = [];
@@ -93,7 +170,7 @@ $w.onReady(async function () {
 
     const _services = await wixData.query("Bookings/Services").find({ suppressAuth: true })
     services = _services.items;
-    console.log("SERVICES",services)
+    
 
     const options = {
         startDateTime: new Date(),
@@ -104,15 +181,15 @@ $w.onReady(async function () {
 
         let serviceID = service._id;
         const availability = await wixBookings.getServiceAvailability(serviceID, options);
-        console.log("AVAILABILITY:", availability)
+        
         const availableSlots = availability.slots;
         for (const slot of availableSlots) {
             availableSlotsIn365Days.push(slot);
             let addrArray = slot.location.businessLocation.address.formatted.split(" ")
-            console.log(addrArray);
+            
             let city = addrArray[4];
             let subdivision = addrArray[5];
-            console.log("City and Sub", city, subdivision);
+            
             
             const addr = {
                 label: city === 'Austin,' ? "Austin, TX - The Long Center" : city + " " +
@@ -153,7 +230,7 @@ $w.onReady(async function () {
         opts.push(addr);
 
     }
-    console.log('OPTS:', opts)
+    
 
     availableSlotsIn365Days.sort(function (a, b) {
         return a.startDateTime.getTime() - b.startDateTime.getTime();
@@ -233,8 +310,132 @@ function indexOfObject(obj, list) {
     return -1;
 }
 
+export function createCTDateFromYMD(dateString) {
+  // Parse string as year, month, day
+  let [year, month, day] = dateString.split('-').map(Number);
+
+  // Central Time is UTC-6 in standard time, UTC-5 during DST
+  // Get current offset from UTC for Central Time on that date
+  let approxDate = new Date(Date.UTC(year, month - 1, day));
+  let ctOffset = getCentralTimeOffset(approxDate); // in minutes
+
+  // Subtract CT offset from UTC to simulate CT-local midnight
+  return new Date(Date.UTC(year, month - 1, day, 0, -ctOffset));
+}
+
+export function getCentralTimeOffset(date) {
+  // "America/Chicago" observes daylight savings
+  return -1 * new Date(date.toLocaleString("en-US", { timeZone: "America/Chicago" })).getTimezoneOffset();
+}
+
+function getStdDevForDay(day) {
+  const lookup = {
+    1: 2,
+    2: 3,
+    3: 4,
+    4: 5,
+    5: 5.5,
+    6: 6,
+    7: 6.5
+  };
+  return lookup[day] || 6.5;
+}
+
+export function normalCDF(x, mean, std) {
+  return 0.5 * (1 + erf((x - mean) / (std * Math.sqrt(2))));
+}
+
+export function erf(x) {
+  const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741;
+  const a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+  const sign = x < 0 ? -1 : 1;
+  x = Math.abs(x);
+  const t = 1 / (1 + p * x);
+  const y = 1 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+  return sign * y;
+}
+
+export function classifyWind(meanWind, meanGust, forecastDay) {
+  const std = getStdDevForDay(forecastDay);
+
+  const windThreshold = 15; // knots
+  const gustThreshold = 20; // knots
+
+  const probWind = 1 - normalCDF(windThreshold, meanWind, std);
+  const probGust = 1 - normalCDF(gustThreshold, meanGust, std);
+
+  const worstProb = Math.max(probWind, probGust); // Be conservative
+
+  if (worstProb < 0.3) return "Good";
+  if (worstProb < 0.7) return "Marginal";
+  return "Bad";
+}
+
+export function getAverageGusts (hours){
+    let total = 0;
+    for (let hour of hours){
+        total += hour.gust_mph;
+    }
+    return total / hours.length;
+}
+
+export function updateWeatherDots(calendarArray) {
+  let targetDate = createCTDateFromYMD(weatherForecast[0].date);
+  let index = calendarArray.findIndex(date =>
+    date.getUTCFullYear() === targetDate.getUTCFullYear() &&
+    date.getUTCMonth() === targetDate.getUTCMonth() &&
+    date.getUTCDate() === targetDate.getUTCDate()
+  );
+  console.log('Index of date', index);
+  console.log("date should be:", calendarArray[index]);
+
+  for (let i = 0; i < weatherForecast.length; i++) {
+    let meanWind = weatherForecast[i].day.maxwind_mph;
+    let meanGust = getAverageGusts(weatherForecast[i].hour)
+    let dailyChanceOfRain = weatherForecast[i].day.daily_chance_of_rain;
+    if(i === 0){
+        //don't use probability calculations if today
+        if(meanWind < 15 && dailyChanceOfRain < .30 && meanGust < 20){
+            //set first day to green;
+            console.log("setting first day to green", meanWind, meanGust, dailyChanceOfRain, "index:", index)
+            $w(`#greenWeather${index}`).show();
+        }else if(meanWind <= 15 && meanGust <= 20 && dailyChanceOfRain > .30 && dailyChanceOfRain < .70){
+            //set first day to yellow
+            console.log("setting first day to yellow", meanWind, meanGust, dailyChanceOfRain, "index:", index)
+            $w(`#yellowWeather${index}`).show();
+        }else{
+            //set first day to red
+            console.log("setting first day to red", meanWind, meanGust, dailyChanceOfRain, "index:", index)
+            $w(`#redWeather${index}`).show();
+        }
+        
+    }else{
+        let windCondition = classifyWind(meanWind, meanGust, i);
+        if(windCondition === "Good" && dailyChanceOfRain < .3){
+            //set to green;
+            console.log("setting day to green", windCondition, dailyChanceOfRain, "index:", index)
+            $w(`#greenWeather${index}`).show();
+
+        }
+        else if(windCondition === "Marginal" || (dailyChanceOfRain > .3 && dailyChanceOfRain < .7)){
+            //set to yellow;
+            console.log("setting day to yellow", windCondition, dailyChanceOfRain, "index:", index)
+            $w(`#yellowWeather${index}`).show();
+        }
+        else {
+            //set to red;
+            console.log("setting day to red", windCondition, dailyChanceOfRain, "index:", index)
+            $w(`#redWeather${index}`).show();
+        }
+    }
+    index++
+  }
+  return;
+}
+
+
+
 function refreshCalendar(location, partySize, selectedDate) {
-    console.log("Refreshing calendar", location, partySize, selectedDate);
     // Collect list of bookable dates at filtered location in a year
     let bookableDates = [];
     let waitlistedDates = [];
@@ -334,11 +535,11 @@ function refreshCalendar(location, partySize, selectedDate) {
         }
 
     });
+    updateWeatherDots(calButtonDates)
     refreshSlots(location, partySize, selectedDate, selectedDate);
 }
 
 function refreshSlots(location, numberOfFlights, startDate, endDate) {
-    console.log("refreshing slots", location, numberOfFlights, startDate, endDate);
     selectableSlots = [];
     //hardcoding a solution to depict Austin, TX when Florence, TX. A more preferred solution would be to update the location of the service itself. 
     const locationText = (location)=>{
@@ -354,7 +555,7 @@ function refreshSlots(location, numberOfFlights, startDate, endDate) {
         $w('#slotSection').hide();
         return;
     }
-    console.log("LOCATION", location);
+    
     
 
     let loc = location == "ALL" ? "" : "in <strong>" + locationText(location) + "</strong>";
@@ -654,7 +855,6 @@ export function btnCheckout_click(event) {
     // booking checkout  
     wixBookingsFrontend.checkoutBooking(bookingInfo, options)
         .then((result) => {
-            console.log(options);
             if (result.status === "Confirmed") {
                 $w('#bookingWizard').changeState("thankyou");
                 //$w('#bookingWizard').scrollTo();
@@ -828,8 +1028,9 @@ export function txtMedia_click(event) {
 *	 @param {$w.MouseEvent} event
 */
 export function dayClick(event) {
-
+    console.log(event.target);
     selectedDate = calButtonDates[indexOfObject(event.target, calDayButtons)];
+    console.log('selected date: ', selectedDate)
     refreshCalendar($w('#locationDropdown').value, Number($w('#numberOfFlightsDropdown').value), selectedDate);
 
 }
