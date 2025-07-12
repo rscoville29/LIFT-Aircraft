@@ -104,10 +104,10 @@ export function hideWeatherDots (){
         dot.hide();
     }
     for(let dot of yellowWeatherDots){
-        dot.style.hide();
+        dot.hide();
     }
     for(let dot of greenWeatherDots){
-        dot.style.hide();
+        dot.hide();
     }
     return;
 }
