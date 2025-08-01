@@ -124,6 +124,45 @@ export async function getFormattedWeather() {
     return data;
 }
 
+export function getSlotWeather (slotDate) {
+    let dateTime = formatDateToWeatherDate(slotDate);
+    console.log("Slot DateTime:", dateTime);
+    let [date, time] = dateTime.split(" ");
+    let [hour, min] = time.split(":")
+    //rounding down to the nearest hour if slot is not on the hour.
+    if(min != "00"){
+        time = hour +":00";
+    }
+    console.log("finding slot weather for", `${date} ${time}`)
+    let dayForecast = weatherForecast.find((obj)=> obj.date == date);
+    console.log("DayForecast:", dayForecast);
+    if(dayForecast){
+    console.log("found forecast for day", dayForecast);
+    let hourForecast = dayForecast.hour.find((obj)=> obj.time == `${date} ${time}`);
+    let weatherSpecs = {
+        condition: hourForecast.condition.text,
+        chanceOfRain: hourForecast.chance_of_rain,
+        wind_mph: hourForecast.wind_mph,
+        gust_mph: hourForecast.gust_mph
+    }
+    return weatherSpecs;
+    }
+    //if no forecast due to outside of weather forecast range:
+    console.log("No weather found for slot");
+    return null;
+}
+
+export function formatDateToWeatherDate(date) {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const hh = String(date.getHours()).padStart(2, "0");
+  const min = String(date.getMinutes()).padStart(2, "0");
+
+  return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+}
+
+
 
 
 $w.onReady(async function () {
@@ -535,7 +574,7 @@ function refreshCalendar(location, partySize, selectedDate) {
         }
 
     });
-    updateWeatherDots(calButtonDates)
+    //updateWeatherDots(calButtonDates)
     refreshSlots(location, partySize, selectedDate, selectedDate);
 }
 
@@ -584,10 +623,15 @@ function refreshSlots(location, numberOfFlights, startDate, endDate) {
         if ((location == "ALL" || (slot_city == city.concat(",") &&
                 slot_subdivision == subdivision)) &&
             isBetweenDates(slot.startDateTime, startDate, endDate)) {
+                let slotWeather = getSlotWeather(slot.startDateTime);
+                if(slotWeather){
+                    slot.slotWeather = slotWeather;
+                }
             selectableSlots.push(slot);
         }
     });
     if(selectableSlots.length > 0){
+        console.log("selectable slots", selectableSlots)
     $w('#txtAvailSessions').show();
     $w('#txtAvailSessions').html = "<h6 style='text-align:left;'>Select your time " + loc + " " + time + " for <strong>" + numberOfFlights.toString() + " flight(s)</strong>!</h6>";
     $w('#text302').hide();
