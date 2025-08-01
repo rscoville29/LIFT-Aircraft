@@ -143,7 +143,8 @@ export function getSlotWeather (slotDate) {
         condition: hourForecast.condition.text,
         chanceOfRain: hourForecast.chance_of_rain,
         wind_mph: hourForecast.wind_mph,
-        gust_mph: hourForecast.gust_mph
+        gust_mph: hourForecast.gust_mph,
+        icon: hourForecast.condition.icon
     }
     return weatherSpecs;
     }
@@ -604,7 +605,7 @@ function refreshSlots(location, numberOfFlights, startDate, endDate) {
         let selectedDateObject = new Date(startDate);
         let selectedDate = selectedDateObject.toLocaleDateString("en-US", { month: 'long', day: '2-digit', weekday: 'long' })
         time = "on <strong>" + selectedDate + "</strong>";
-
+        console.log("TIME:", time)
     } else {
         let selectedSDateObject = new Date(startDate);
         let selectedSDate = selectedSDateObject.toLocaleDateString("en-US", { month: 'long', day: '2-digit', weekday: 'long' })
@@ -710,9 +711,20 @@ export function numberOfFlightsDropdown_change(event) {
 */
 export function repeater_itemReady($item, itemData, index) {
 
-    let selectedDateObject = new Date(itemData.startDateTime);
-    let selectedDate = selectedDateObject.toLocaleDateString("en-US", { month: 'long', day: '2-digit', weekday: 'long' })
-    let selectedTime = selectedDateObject.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
+let selectedDateObject = new Date(itemData.startDateTime);
+
+let selectedDate = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/Chicago",
+  month: "long",
+  day: "2-digit",
+  weekday: "long"
+}).format(selectedDateObject);
+
+let selectedTime = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/Chicago",
+  hour: "2-digit",
+  minute: "2-digit"
+}).format(selectedDateObject);
 
     const service = services.find(s => s._id === itemData.serviceId);
 
