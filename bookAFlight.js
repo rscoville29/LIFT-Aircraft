@@ -99,7 +99,6 @@ let USDollar = new Intl.NumberFormat('en-US', {
 });
 
 export function hideWeatherDots (){
-    console.log("hiding all weather dots");
     for(let dot of redWeatherDots){
         dot.hide();
     }
@@ -275,6 +274,7 @@ $w.onReady(async function () {
     availableSlotsIn365Days.sort(function (a, b) {
         return a.startDateTime.getTime() - b.startDateTime.getTime();
     });
+    
 
     $w('#locationDropdown').options = opts;
     $w('#filterSection').show();
@@ -504,7 +504,15 @@ function refreshCalendar(location, partySize, selectedDate) {
     });
 
     if (selectedDate == null && initialVisit) {
-        selectedDate = today;
+        //if at least one available slot exists, select first available as default:
+        if(availableSlotsIn365Days[0]){
+            selectedDate = availableSlotsIn365Days[0].startDateTime;
+        } 
+        //if no available slots exist, default to today
+        else{
+            selectedDate = today
+        }
+
     }
 
     let firstDay = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
