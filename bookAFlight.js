@@ -99,7 +99,6 @@ let USDollar = new Intl.NumberFormat('en-US', {
 });
 
 export function hideWeatherDots (){
-    console.log("hiding all weather dots");
     for(let dot of redWeatherDots){
         dot.hide();
     }
@@ -143,7 +142,8 @@ export function getSlotWeather (slotDate) {
         condition: hourForecast.condition.text,
         chanceOfRain: hourForecast.chance_of_rain,
         wind_mph: hourForecast.wind_mph,
-        gust_mph: hourForecast.gust_mph
+        gust_mph: hourForecast.gust_mph,
+        icon: hourForecast.condition.icon
     }
     return weatherSpecs;
     }
@@ -274,6 +274,7 @@ $w.onReady(async function () {
     availableSlotsIn365Days.sort(function (a, b) {
         return a.startDateTime.getTime() - b.startDateTime.getTime();
     });
+    
 
     $w('#locationDropdown').options = opts;
     $w('#filterSection').show();
@@ -503,7 +504,15 @@ function refreshCalendar(location, partySize, selectedDate) {
     });
 
     if (selectedDate == null && initialVisit) {
-        selectedDate = today;
+        //if at least one available slot exists, select first available as default:
+        if(availableSlotsIn365Days[0]){
+            selectedDate = availableSlotsIn365Days[0].startDateTime;
+        } 
+        //if no available slots exist, default to today
+        else{
+            selectedDate = today
+        }
+
     }
 
     let firstDay = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
@@ -604,7 +613,7 @@ function refreshSlots(location, numberOfFlights, startDate, endDate) {
         let selectedDateObject = new Date(startDate);
         let selectedDate = selectedDateObject.toLocaleDateString("en-US", { month: 'long', day: '2-digit', weekday: 'long' })
         time = "on <strong>" + selectedDate + "</strong>";
-
+        console.log("TIME:", time)
     } else {
         let selectedSDateObject = new Date(startDate);
         let selectedSDate = selectedSDateObject.toLocaleDateString("en-US", { month: 'long', day: '2-digit', weekday: 'long' })
@@ -710,9 +719,20 @@ export function numberOfFlightsDropdown_change(event) {
 */
 export function repeater_itemReady($item, itemData, index) {
 
-    let selectedDateObject = new Date(itemData.startDateTime);
-    let selectedDate = selectedDateObject.toLocaleDateString("en-US", { month: 'long', day: '2-digit', weekday: 'long' })
-    let selectedTime = selectedDateObject.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
+let selectedDateObject = new Date(itemData.startDateTime);
+
+let selectedDate = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/Chicago",
+  month: "long",
+  day: "2-digit",
+  weekday: "long"
+}).format(selectedDateObject);
+
+let selectedTime = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/Chicago",
+  hour: "2-digit",
+  minute: "2-digit"
+}).format(selectedDateObject);
 
     const service = services.find(s => s._id === itemData.serviceId);
 

@@ -53,7 +53,7 @@ import {emailMemberOnVideoUpload} from './webmethods.web'
  }  
 
 export async function generateDocumentFromTemplate(data) {
-    console.log("attempting docupilot deilvery", data)
+    console.log("attempting docupilot deilvery");
     const secret = await getSecret('Docupilot_Encoded_API_KEY');
     const url = 'https://api.docupilot.app/documents/create/c7e93cdd/d3b22bc2'; 
     const token = secret;
@@ -83,51 +83,50 @@ export async function generateDocumentFromTemplate(data) {
     }
 }
 
-export async function deletePreviousReleaseForm(email) {
-    console.log("Attempting to delete previous waiver form for", email);
+export async function deleteOldForm(email) {
+    console.log("Attempting to delete old waiver form for", email);
     try {
         // Query for the existing form
         const res = await wixData.query("PilotReleaseForms")
             .eq("email", email)
-            .find();
-
-        if (res.totalCount > 0) {
-            let formId = res.items[0]._id;
-
+            .ascending("_createdDate")
+            .find()
+            .then(async (results)=>{
+                let items = results.items;
+                let count = results.totalCount;
+                console.log(items)
+                console.log(count)
+            if (count > 1) {
+            console.log("found old record")
+            let formId = results.items[0]._id;
+            console.log(formId);
             // Delete the found form
-            const deleteRes = await wixData.remove("PilotReleaseForms", formId);
-            console.log("Deleted old waiver record:", deleteRes);
+            await wixData.remove("PilotReleaseForms", formId).then(()=>{console.log("Deleted old waiver record:");})
+            
         } else {
             console.log("No previous release form found");
         }
+            })
+
+
     } catch (error) {
         console.error("Error deleting previous waiver form:", error);
     }
 }
 
 
-/*
-commenting out the beforeInsert because there is an issue on Wix's backend. Their Hooks are not executing properly.
-Will report issue to Wix. Date: 03/09/2025
-
-export function PilotReleaseForms_beforeInsert(item, context) {
-    console.log("Before Insert", item)
-    const {email} = item;
-    deletePreviousReleaseForm(email)
- 
-}
-*/
 
 
 
-export async function PilotReleaseForms_afterInsert(item, context) {
-  console.log("After Insert:", item, context)
+export function PilotReleaseForms_afterInsert(item, context) {
+  console.log("After Insert:")
+  let email = item.email;
   
-  const imageUrl = item.signature;
-  console.log("IMageURL:", imageUrl);
+  let imageUrl = item.signature;
+  console.log(imageUrl);
       
 
-   const data = {
+   let data = {
 	firstName: item.firstName,
     lastName: item.lastName,
     email: item.email,
@@ -144,13 +143,28 @@ export async function PilotReleaseForms_afterInsert(item, context) {
 	date: item.date
 	  }
 
-	  console.log("DATA:", JSON.stringify(data));
+	  console.log(data);
+      deleteOldForm(email)
       generateDocumentFromTemplate(data);
 
 
 }
 
 export async function FlightVideos_afterUpdate(item, context) {
+    console.log("Flight Video collection updated!", item)
+    if(item.video){
+        console.log("Video Exists")
+        console.log("item email:", item.pilotEmail)
+        const memberId = await getMemberIdByEmail(item.pilotEmail)
+        if(memberId){
+            console.log("found member id", memberId)
+        await emailMemberOnVideoUpload(memberId, item.firstName);
+        }
+        
+    }
+}
+
+export async function FlightVideos_afterInsert(item, context) {
     console.log("Flight Video collection updated!", item)
     if(item.video){
         console.log("Video Exists")
